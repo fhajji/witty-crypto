@@ -6,6 +6,7 @@
 #include <Wt/WApplication.h>
 #include <Wt/WBreak.h>
 #include <Wt/WContainerWidget.h>
+#include <Wt/WGridLayout.h>
 #include <Wt/WLineEdit.h>
 #include <Wt/WTextArea.h>
 #include <Wt/WPushButton.h>
@@ -35,25 +36,27 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env)
 {
 	setTitle("Crypt Demo");
+	root()->setHeight(480);
+	root()->setWidth(640);
 
-	root()->addWidget(std::make_unique<Wt::WText>("Key "));
-	keyTextEdit_ = root()->addWidget(std::make_unique<Wt::WLineEdit>());
+	auto grid = root()->setLayout(std::make_unique<Wt::WGridLayout>());
+
+	grid->addWidget(std::make_unique<Wt::WText>("Key "), 0, 0);
+	keyTextEdit_ = grid->addWidget(std::make_unique<Wt::WLineEdit>(), 0, 1);
 	keyTextEdit_->setFocus();
 
-	root()->addWidget(std::make_unique<Wt::WBreak>());    // insert a line break
-
-	root()->addWidget(std::make_unique<Wt::WText>("Plaintext "));
-	plainTextEdit_ = root()->addWidget(std::make_unique<Wt::WTextArea>());
-	auto buttonEncrypt = root()->addWidget(std::make_unique<Wt::WPushButton>("Encrypt"));
-	buttonEncrypt->setMargin(5, Wt::Side::Left);
+	grid->addWidget(std::make_unique<Wt::WText>("Plaintext "), 1, 0);
+	plainTextEdit_ = grid->addWidget(std::make_unique<Wt::WTextArea>(), 1, 1);
+	auto buttonEncrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Encrypt"), 1, 2);
 	
-	root()->addWidget(std::make_unique<Wt::WBreak>());    // insert a line break
+	grid->addWidget(std::make_unique<Wt::WText>("Ciphertext "), 2, 0);
+	cipherTextEdit_ = grid->addWidget(std::make_unique<Wt::WTextArea>(), 2, 1);
+	auto buttonDecrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Decrypt"), 2, 2);
 
-	root()->addWidget(std::make_unique<Wt::WText>("Ciphertext "));
-	cipherTextEdit_ = root()->addWidget(std::make_unique<Wt::WTextArea>());
-	auto buttonDecrypt = root()->addWidget(std::make_unique<Wt::WPushButton>("Decrypt"));
-	buttonDecrypt->setMargin(5, Wt::Side::Left);
-	
+	grid->setRowStretch(1, 1);
+	grid->setRowStretch(2, 1);
+	grid->setColumnStretch(1, 1);
+
 	buttonEncrypt->clicked().connect(this, &EncDecApplication::encrypt);
 	buttonDecrypt->clicked().connect(this, &EncDecApplication::decrypt);
 
