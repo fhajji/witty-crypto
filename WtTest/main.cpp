@@ -12,6 +12,8 @@
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
 
+#include "crypto.h"
+
 /*
 * A simple encryptor / decryptor.
 */
@@ -21,6 +23,8 @@ public:
 	EncDecApplication(const Wt::WEnvironment& env);
 
 private:
+	std::unique_ptr<Crypto> crypto_;
+
 	Wt::WLineEdit *keyTextEdit_;
 	Wt::WTextArea *plainTextEdit_;
 	Wt::WTextArea *cipherTextEdit_;
@@ -35,6 +39,8 @@ private:
 EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env)
 {
+	crypto_ = std::make_unique<Crypto>();
+
 	setTitle("Crypt Demo");
 	root()->setHeight(480);
 	root()->setWidth(640);
