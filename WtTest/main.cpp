@@ -1,102 +1,83 @@
 /*
-* Copyright (C) 2008 Emweb bvba, Heverlee, Belgium.
-*
-* See the LICENSE file for terms of use.
+* Simple Encrypt / Decrypt Demo.
+* Copyright (C) 2018 Farid Hajji <farid@hajji.name>
 */
 
 #include <Wt/WApplication.h>
 #include <Wt/WBreak.h>
 #include <Wt/WContainerWidget.h>
 #include <Wt/WLineEdit.h>
+#include <Wt/WTextArea.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
 
 /*
-* A simple hello world application class which demonstrates how to react
-* to events, read input, and give feed-back.
+* A simple encryptor / decryptor.
 */
-class HelloApplication : public Wt::WApplication
+class EncDecApplication : public Wt::WApplication
 {
 public:
-	HelloApplication(const Wt::WEnvironment& env);
+	EncDecApplication(const Wt::WEnvironment& env);
 
 private:
-	Wt::WLineEdit *nameEdit_;
-	Wt::WText     *greeting_;
+	Wt::WLineEdit *keyTextEdit_;
+	Wt::WTextArea *plainTextEdit_;
+	Wt::WTextArea *cipherTextEdit_;
 
-	void greet();
+	void encrypt();
+	void decrypt();
 };
 
 /*
-* The env argument contains information about the new session, and
-* the initial request. It must be passed to the WApplication
-* constructor so it is typically also an argument for your custom
-* application constructor.
+* Create the GUI
 */
-HelloApplication::HelloApplication(const Wt::WEnvironment& env)
+EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env)
 {
-	setTitle("Hello world");                            // application title
+	setTitle("Crypt Demo");
 
-	root()->addWidget(std::make_unique<Wt::WText>("Your name, please ? ")); // show some text
-
-	nameEdit_ = root()->addWidget(std::make_unique<Wt::WLineEdit>()); // allow text input
-	nameEdit_->setFocus();                              // give focus
-
-	auto button = root()->addWidget(std::make_unique<Wt::WPushButton>("Greet me."));
-	// create a button
-	button->setMargin(5, Wt::Side::Left);                   // add 5 pixels margin
+	root()->addWidget(std::make_unique<Wt::WText>("Key "));
+	keyTextEdit_ = root()->addWidget(std::make_unique<Wt::WLineEdit>());
+	keyTextEdit_->setFocus();
 
 	root()->addWidget(std::make_unique<Wt::WBreak>());    // insert a line break
-	greeting_ = root()->addWidget(std::make_unique<Wt::WText>()); // empty text
 
-																		/*
-																		* Connect signals with slots
-																		*
-																		* - simple Wt-way: specify object and method
-																		*/
-	button->clicked().connect(this, &HelloApplication::greet);
+	root()->addWidget(std::make_unique<Wt::WText>("Plaintext "));
+	plainTextEdit_ = root()->addWidget(std::make_unique<Wt::WTextArea>());
+	auto buttonEncrypt = root()->addWidget(std::make_unique<Wt::WPushButton>("Encrypt"));
+	buttonEncrypt->setMargin(5, Wt::Side::Left);
+	
+	root()->addWidget(std::make_unique<Wt::WBreak>());    // insert a line break
 
-	/*
-	* - using an arbitrary function object, e.g. useful to bind
-	*   values with std::bind() to the resulting method call
-	*/
-	nameEdit_->enterPressed().connect(std::bind(&HelloApplication::greet, this));
+	root()->addWidget(std::make_unique<Wt::WText>("Ciphertext "));
+	cipherTextEdit_ = root()->addWidget(std::make_unique<Wt::WTextArea>());
+	auto buttonDecrypt = root()->addWidget(std::make_unique<Wt::WPushButton>("Decrypt"));
+	buttonDecrypt->setMargin(5, Wt::Side::Left);
+	
+	buttonEncrypt->clicked().connect(this, &EncDecApplication::encrypt);
+	buttonDecrypt->clicked().connect(this, &EncDecApplication::decrypt);
 
-	/*
-	* - using a lambda:
-	*/
-	button->clicked().connect([=]() {
-		std::cerr << "Hello there, " << nameEdit_->text() << std::endl;
-	});
+	plainTextEdit_->enterPressed().connect(this, &EncDecApplication::encrypt);
+	cipherTextEdit_->enterPressed().connect(this, &EncDecApplication::decrypt);
+	keyTextEdit_->enterPressed().connect(this, &EncDecApplication::encrypt);
 }
 
-void HelloApplication::greet()
+void EncDecApplication::encrypt()
 {
-	/*
-	* Update the text, using text input into the nameEdit_ field.
-	*/
-	greeting_->setText("Hello there, " + nameEdit_->text());
+	// dummy encrytion for now...
+	cipherTextEdit_->setText(Wt::WString("E({1}, {2})").arg(keyTextEdit_->text()).arg(plainTextEdit_->text()));
 }
+
+void EncDecApplication::decrypt()
+{
+	// dummy encryption for now...
+	plainTextEdit_->setText(Wt::WString("D({1}, {2})").arg(keyTextEdit_->text()).arg(cipherTextEdit_->text()));
+}
+
 
 int main(int argc, char **argv)
 {
-	/*
-	* Your main method may set up some shared resources, but should then
-	* start the server application (FastCGI or httpd) that starts listening
-	* for requests, and handles all of the application life cycles.
-	*
-	* The last argument to WRun specifies the function that will instantiate
-	* new application objects. That function is executed when a new user surfs
-	* to the Wt application, and after the library has negotiated browser
-	* support. The function should return a newly instantiated application
-	* object.
-	*/
 	return Wt::WRun(argc, argv, [](const Wt::WEnvironment &env) {
-		/*
-		* You could read information from the environment to decide whether
-		* the user has permission to start a new application
-		*/
-		return std::make_unique<HelloApplication>(env);
+		return std::make_unique<EncDecApplication>(env);
 	});
 }
