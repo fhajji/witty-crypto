@@ -41,8 +41,37 @@ public:
 	}
 
 	blob_t encrypt(const blob_t &plaintext) {
-		// dummy encryption for now
-		blob_t ciphertext{ plaintext };
+		EVP_CIPHER_CTX ctx;
+		EVP_CIPHER_CTX_init(&ctx);
+
+		if (1 != EVP_EncryptInit_ex(&ctx,
+			EVP_aes_128_cbc(),
+			NULL,
+			key_.data(),
+			iv_.data())) {
+			EVP_CIPHER_CTX_cleanup(&ctx);
+			throw std::runtime_error("EVP_EncryptInit_ex()");
+		}
+
+		// output buffer size = inl + cipher_block_size - 1
+		blob_t ciphertext(plaintext.size() + 16 - 1);
+
+		int outl = 0;
+		if (1 != EVP_EncryptUpdate(&ctx, ciphertext.data(), &outl,
+			plaintext.data(), plaintext.size())) {
+			EVP_CIPHER_CTX_cleanup(&ctx);
+			throw std::runtime_error("EVP_EncryptUpdate()");
+		}
+		ciphertext.resize(outl);
+
+		blob_t finalblock(16);
+		if (1 != EVP_EncryptFinal_ex(&ctx, finalblock.data(), &outl)) {
+			EVP_CIPHER_CTX_cleanup(&ctx);
+			throw std::runtime_error("EVP_EncryptFinal_ex()");
+		}
+		for (int i = 0; i < outl; ++i)
+			ciphertext.push_back(finalblock[i]);
+
 		return ciphertext;
 	}
 
