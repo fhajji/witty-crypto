@@ -114,8 +114,17 @@ void EncDecApplication::encrypt()
 	auto wPlain{ plainTextEdit_->text().narrow() };
 	Crypto::blob_t plaintext(wPlain.cbegin(), wPlain.cend());
 
-	Crypto::blob_t ciphertext{ crypto_->encrypt(plaintext) };
-	std::string ct(ciphertext.cbegin(), ciphertext.cend());
+	Crypto::blob_t ciphertext;
+	std::string ct;
+
+	try {
+		ciphertext = crypto_->encrypt(plaintext);
+		ct.assign(ciphertext.cbegin(), ciphertext.cend());
+	}
+	catch (std::runtime_error &e) {
+		ct = e.what();
+	}
+
 	cipherTextEdit_->setText(Wt::WString(ct));
 }
 
@@ -124,8 +133,17 @@ void EncDecApplication::decrypt()
 	auto wCipher{ cipherTextEdit_->text().narrow() };
 	Crypto::blob_t ciphertext(wCipher.cbegin(), wCipher.cend());
 
-	Crypto::blob_t plaintext{ crypto_->decrypt(ciphertext) };
-	std::string pt(plaintext.cbegin(), plaintext.cend());
+	Crypto::blob_t plaintext;
+	std::string pt;
+
+	try {
+		plaintext = crypto_->decrypt(ciphertext);
+		pt.assign(plaintext.cbegin(), plaintext.cend());
+	}
+	catch (std::runtime_error &e) {
+		pt = e.what();
+	}
+
 	plainTextEdit_->setText(Wt::WString(pt));
 }
 

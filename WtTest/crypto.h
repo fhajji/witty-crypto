@@ -77,8 +77,38 @@ public:
 	}
 
 	blob_t decrypt(const blob_t &ciphertext) {
-		// dummy decryption for now
-		blob_t plaintext{ ciphertext };
+		EVP_CIPHER_CTX ctx;
+		EVP_CIPHER_CTX_init(&ctx);
+
+		if (1 != EVP_DecryptInit_ex(&ctx,
+			EVP_aes_128_cbc(),
+			NULL,
+			key_.data(),
+			iv_.data())) {
+			EVP_CIPHER_CTX_cleanup(&ctx);
+			throw std::runtime_error("EVP_DecryptInit_ex()");
+		}
+
+		// output buffer size = inl + cipher_block_size
+		blob_t plaintext(ciphertext.size() + 16);
+
+		int outl = 0;
+		if (1 != EVP_DecryptUpdate(&ctx, plaintext.data(), &outl,
+			ciphertext.data(), ciphertext.size())) {
+			EVP_CIPHER_CTX_cleanup(&ctx);
+			throw std::runtime_error("EVP_DecryptUpdate()");
+		}
+		plaintext.resize(outl);
+
+		blob_t finalblock(16);
+		if (1 != EVP_DecryptFinal_ex(&ctx, finalblock.data(), &outl)) {
+			EVP_CIPHER_CTX_cleanup(&ctx);
+			throw std::runtime_error("EVP_DecryptFinal_ex()");
+		}
+		for (int i = 0; i < outl; ++i)
+			plaintext.push_back(finalblock[i]);
+
+		EVP_CIPHER_CTX_cleanup(&ctx);
 		return plaintext;
 	}
 
