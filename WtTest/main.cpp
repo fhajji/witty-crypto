@@ -13,6 +13,8 @@
 #include <Wt/WText.h>
 
 #include "crypto.h"
+#include <ios>
+#include <sstream>
 
 /*
 * A simple encryptor / decryptor.
@@ -25,10 +27,11 @@ public:
 private:
 	std::unique_ptr<Crypto> crypto_;
 
-	Wt::WLineEdit *keyTextEdit_;
+	Wt::WText     *keyText_;
 	Wt::WTextArea *plainTextEdit_;
 	Wt::WTextArea *cipherTextEdit_;
 
+	void newkey();
 	void encrypt();
 	void decrypt();
 };
@@ -48,11 +51,12 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	auto grid = root()->setLayout(std::make_unique<Wt::WGridLayout>());
 
 	grid->addWidget(std::make_unique<Wt::WText>("Key "), 0, 0);
-	keyTextEdit_ = grid->addWidget(std::make_unique<Wt::WLineEdit>(), 0, 1);
-	keyTextEdit_->setFocus();
+	keyText_ = grid->addWidget(std::make_unique<Wt::WText>(), 0, 1);
+	auto buttonKey = grid->addWidget(std::make_unique<Wt::WPushButton>("Generate Key"), 0, 2);
 
 	grid->addWidget(std::make_unique<Wt::WText>("Plaintext "), 1, 0);
 	plainTextEdit_ = grid->addWidget(std::make_unique<Wt::WTextArea>(), 1, 1);
+	plainTextEdit_->setFocus();
 	auto buttonEncrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Encrypt"), 1, 2);
 	
 	grid->addWidget(std::make_unique<Wt::WText>("Ciphertext "), 2, 0);
@@ -63,24 +67,34 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	grid->setRowStretch(2, 1);
 	grid->setColumnStretch(1, 1);
 
+	buttonKey->clicked().connect(this, &EncDecApplication::newkey);
 	buttonEncrypt->clicked().connect(this, &EncDecApplication::encrypt);
 	buttonDecrypt->clicked().connect(this, &EncDecApplication::decrypt);
 
 	plainTextEdit_->enterPressed().connect(this, &EncDecApplication::encrypt);
 	cipherTextEdit_->enterPressed().connect(this, &EncDecApplication::decrypt);
-	keyTextEdit_->enterPressed().connect(this, &EncDecApplication::encrypt);
+}
+
+void EncDecApplication::newkey()
+{
+	// XXX generate a new random key
+	std::ostringstream oss;
+	auto key = crypto_->newKey(16);
+	for (std::size_t i = 0; i<key.size(); ++i)
+		oss << std::hex << static_cast<unsigned int>(key[i]);
+	keyText_->setText(oss.str());
 }
 
 void EncDecApplication::encrypt()
 {
 	// dummy encrytion for now...
-	cipherTextEdit_->setText(Wt::WString("E({1}, {2})").arg(keyTextEdit_->text()).arg(plainTextEdit_->text()));
+	cipherTextEdit_->setText(Wt::WString("E({1}, {2})").arg(keyText_->text()).arg(plainTextEdit_->text()));
 }
 
 void EncDecApplication::decrypt()
 {
 	// dummy encryption for now...
-	plainTextEdit_->setText(Wt::WString("D({1}, {2})").arg(keyTextEdit_->text()).arg(cipherTextEdit_->text()));
+	plainTextEdit_->setText(Wt::WString("D({1}, {2})").arg(keyText_->text()).arg(cipherTextEdit_->text()));
 }
 
 
