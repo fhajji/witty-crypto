@@ -72,6 +72,7 @@ public:
 		for (int i = 0; i < outl; ++i)
 			ciphertext.push_back(finalblock[i]);
 
+		EVP_CIPHER_CTX_cleanup(&ctx);
 		return ciphertext;
 	}
 
