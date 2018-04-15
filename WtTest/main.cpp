@@ -15,6 +15,7 @@
 #include "crypto.h"
 #include <ios>
 #include <sstream>
+#include <iomanip>
 
 /*
 * A simple encryptor / decryptor.
@@ -119,9 +120,17 @@ void EncDecApplication::encrypt()
 
 	try {
 		ciphertext = crypto_->encrypt(plaintext);
-		ct.assign(ciphertext.cbegin(), ciphertext.cend());
+		// output the ciphertext as (lossless) hex
+		std::ostringstream oss;
+		oss << std::hex << std::setfill('0');
+
+		for (const unsigned char c : ciphertext) {
+			oss << std::setw(2) << static_cast<unsigned int>(c) << " ";
+		}
+		ct.assign(oss.str());
 	}
 	catch (std::runtime_error &e) {
+		// output error message instead
 		ct = e.what();
 	}
 
@@ -131,7 +140,13 @@ void EncDecApplication::encrypt()
 void EncDecApplication::decrypt()
 {
 	auto wCipher{ cipherTextEdit_->text().narrow() };
-	Crypto::blob_t ciphertext(wCipher.cbegin(), wCipher.cend());
+	Crypto::blob_t ciphertext;
+
+	std::istringstream iss(wCipher);
+	unsigned int c;
+	while (iss >> std::hex >> c) {
+		ciphertext.push_back(static_cast<unsigned char>(c));
+	}
 
 	Crypto::blob_t plaintext;
 	std::string pt;
