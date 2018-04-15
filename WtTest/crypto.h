@@ -18,7 +18,7 @@ public:
 	using bytes_t = unsigned char;
 	using blob_t = std::vector<bytes_t>;
 
-	Crypto() {
+	Crypto(const EVP_CIPHER *cipher) : cipher_(cipher) {
 		ERR_load_crypto_strings();
 		OpenSSL_add_all_algorithms();
 		OPENSSL_config(NULL);
@@ -49,7 +49,7 @@ public:
 		EVP_CIPHER_CTX_init(&ctx);
 
 		if (1 != EVP_EncryptInit_ex(&ctx,
-			EVP_aes_128_cbc(),
+			cipher_,
 			NULL,
 			key_.data(),
 			iv_.data())) {
@@ -83,7 +83,7 @@ public:
 		EVP_CIPHER_CTX_init(&ctx);
 
 		if (1 != EVP_DecryptInit_ex(&ctx,
-			EVP_aes_128_cbc(),
+			cipher_,
 			NULL,
 			key_.data(),
 			iv_.data())) {
@@ -124,6 +124,7 @@ private:
 		return key;
 	}
 
+	const EVP_CIPHER *cipher_;
 	blob_t key_;
 	blob_t iv_;
 };

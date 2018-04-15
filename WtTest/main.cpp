@@ -45,7 +45,7 @@ private:
 EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env)
 {
-	crypto_ = std::make_unique<Crypto>();
+	crypto_ = std::make_unique<Crypto>(EVP_aes_128_cbc());
 
 	setTitle("Crypt Demo");
 	root()->setHeight(480);
