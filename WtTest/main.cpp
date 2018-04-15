@@ -77,9 +77,12 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 
 void EncDecApplication::newkey()
 {
-	// XXX generate a new random key
+	// generate a new random key
+	crypto_->newKey(16);
+	crypto_->newIV(16);
+
 	std::ostringstream oss;
-	auto key = crypto_->newKey(16);
+	auto key = crypto_->key();
 	for (std::size_t i = 0; i<key.size(); ++i)
 		oss << std::hex << static_cast<unsigned int>(key[i]);
 	keyText_->setText(oss.str());
@@ -87,16 +90,23 @@ void EncDecApplication::newkey()
 
 void EncDecApplication::encrypt()
 {
-	// dummy encrytion for now...
-	cipherTextEdit_->setText(Wt::WString("E({1}, {2})").arg(keyText_->text()).arg(plainTextEdit_->text()));
+	auto wPlain{ plainTextEdit_->text().narrow() };
+	Crypto::blob_t plaintext(wPlain.cbegin(), wPlain.cend());
+
+	Crypto::blob_t ciphertext{ crypto_->encrypt(plaintext) };
+	std::string ct(ciphertext.cbegin(), ciphertext.cend());
+	cipherTextEdit_->setText(Wt::WString(ct));
 }
 
 void EncDecApplication::decrypt()
 {
-	// dummy encryption for now...
-	plainTextEdit_->setText(Wt::WString("D({1}, {2})").arg(keyText_->text()).arg(cipherTextEdit_->text()));
-}
+	auto wCipher{ cipherTextEdit_->text().narrow() };
+	Crypto::blob_t ciphertext(wCipher.cbegin(), wCipher.cend());
 
+	Crypto::blob_t plaintext{ crypto_->decrypt(ciphertext) };
+	std::string pt(plaintext.cbegin(), plaintext.cend());
+	plainTextEdit_->setText(Wt::WString(pt));
+}
 
 int main(int argc, char **argv)
 {
