@@ -11,6 +11,8 @@
 #include <utility>
 #include <exception>
 
+#include "scopeguard.h"
+
 class Crypto {
 public:
 	using bytes_t = unsigned char;
@@ -42,6 +44,8 @@ public:
 
 	blob_t encrypt(const blob_t &plaintext) {
 		EVP_CIPHER_CTX ctx;
+		ScopeGuard guard(&ctx);
+
 		EVP_CIPHER_CTX_init(&ctx);
 
 		if (1 != EVP_EncryptInit_ex(&ctx,
@@ -49,7 +53,6 @@ public:
 			NULL,
 			key_.data(),
 			iv_.data())) {
-			EVP_CIPHER_CTX_cleanup(&ctx);
 			throw std::runtime_error("EVP_EncryptInit_ex()");
 		}
 
@@ -59,25 +62,24 @@ public:
 		int outl = 0;
 		if (1 != EVP_EncryptUpdate(&ctx, ciphertext.data(), &outl,
 			plaintext.data(), plaintext.size())) {
-			EVP_CIPHER_CTX_cleanup(&ctx);
 			throw std::runtime_error("EVP_EncryptUpdate()");
 		}
 		ciphertext.resize(outl);
 
 		blob_t finalblock(16);
 		if (1 != EVP_EncryptFinal_ex(&ctx, finalblock.data(), &outl)) {
-			EVP_CIPHER_CTX_cleanup(&ctx);
 			throw std::runtime_error("EVP_EncryptFinal_ex()");
 		}
 		for (int i = 0; i < outl; ++i)
 			ciphertext.push_back(finalblock[i]);
 
-		EVP_CIPHER_CTX_cleanup(&ctx);
 		return ciphertext;
 	}
 
 	blob_t decrypt(const blob_t &ciphertext) {
 		EVP_CIPHER_CTX ctx;
+		ScopeGuard guard(&ctx);
+
 		EVP_CIPHER_CTX_init(&ctx);
 
 		if (1 != EVP_DecryptInit_ex(&ctx,
@@ -85,7 +87,6 @@ public:
 			NULL,
 			key_.data(),
 			iv_.data())) {
-			EVP_CIPHER_CTX_cleanup(&ctx);
 			throw std::runtime_error("EVP_DecryptInit_ex()");
 		}
 
@@ -95,20 +96,17 @@ public:
 		int outl = 0;
 		if (1 != EVP_DecryptUpdate(&ctx, plaintext.data(), &outl,
 			ciphertext.data(), ciphertext.size())) {
-			EVP_CIPHER_CTX_cleanup(&ctx);
 			throw std::runtime_error("EVP_DecryptUpdate()");
 		}
 		plaintext.resize(outl);
 
 		blob_t finalblock(16);
 		if (1 != EVP_DecryptFinal_ex(&ctx, finalblock.data(), &outl)) {
-			EVP_CIPHER_CTX_cleanup(&ctx);
 			throw std::runtime_error("EVP_DecryptFinal_ex()");
 		}
 		for (int i = 0; i < outl; ++i)
 			plaintext.push_back(finalblock[i]);
 
-		EVP_CIPHER_CTX_cleanup(&ctx);
 		return plaintext;
 	}
 
