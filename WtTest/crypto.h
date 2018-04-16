@@ -34,12 +34,12 @@ public:
 	const blob_t key() const { return key_; }
 	const blob_t iv() const { return iv_; }
 
-	void newKey(const std::size_t nbytes) {
-		key_ = newrand<EVP_MAX_KEY_LENGTH>(nbytes);
+	void newKey() {
+		key_ = newrand<EVP_MAX_KEY_LENGTH>(EVP_CIPHER_key_length(cipher_));
 	}
 
-	void newIV(const std::size_t nbytes) {
-		iv_ = newrand<EVP_MAX_IV_LENGTH>(nbytes);
+	void newIV() {
+		iv_ = newrand<EVP_MAX_IV_LENGTH>(EVP_CIPHER_iv_length(cipher_));
 	}
 
 	blob_t encrypt(const blob_t &plaintext) {

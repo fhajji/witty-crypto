@@ -45,11 +45,11 @@ private:
 EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env)
 {
-	crypto_ = std::make_unique<Crypto>(EVP_aes_128_cbc());
+	crypto_ = std::make_unique<Crypto>(EVP_aes_256_cbc());
 
 	setTitle("Crypt Demo");
 	root()->setHeight(480);
-	root()->setWidth(640);
+	root()->setWidth(800);
 
 	auto grid = root()->setLayout(std::make_unique<Wt::WGridLayout>());
 
@@ -89,7 +89,7 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 void EncDecApplication::newkey()
 {
 	// generate a new random key
-	crypto_->newKey(16);
+	crypto_->newKey();
 
 	std::ostringstream oss;
 	auto key = crypto_->key();
@@ -101,7 +101,7 @@ void EncDecApplication::newkey()
 void EncDecApplication::newiv()
 {
 	// generate a new random IV
-	crypto_->newIV(16);
+	crypto_->newIV();
 
 	std::ostringstream oss;
 	auto iv = crypto_->iv();
