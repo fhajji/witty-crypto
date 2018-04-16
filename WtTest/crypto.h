@@ -53,15 +53,7 @@ public:
 			NULL,
 			key_.data(),
 			iv_.data())) {
-			std::ostringstream ess;
-			ess << "EVP_EncryptInit_ex(): " << std::endl;
-			while (auto err = ERR_get_error()) {
-				char buf[256];
-				ERR_error_string_n(err, buf, sizeof(buf));
-				ess << buf << std::endl;
-			}
-
-			throw std::runtime_error(ess.str());
+			throw std::runtime_error(error_msg());
 		}
 
 		// output buffer size = inl + cipher_block_size - 1
@@ -70,29 +62,13 @@ public:
 		int outl = 0;
 		if (1 != EVP_EncryptUpdate(&ctx, ciphertext.data(), &outl,
 			plaintext.data(), plaintext.size())) {
-			std::ostringstream ess;
-			ess << "EVP_EncryptUpdate(): " << std::endl;
-			while (auto err = ERR_get_error()) {
-				char buf[256];
-				ERR_error_string_n(err, buf, sizeof(buf));
-				ess << buf << std::endl;
-			}
-
-			throw std::runtime_error(ess.str());
+			throw std::runtime_error(error_msg());
 		}
 		ciphertext.resize(outl);
 
 		blob_t finalblock(16);
 		if (1 != EVP_EncryptFinal_ex(&ctx, finalblock.data(), &outl)) {
-			std::ostringstream ess;
-			ess << "EVP_EncryptFinal_ex(): " << std::endl;
-			while (auto err = ERR_get_error()) {
-				char buf[256];
-				ERR_error_string_n(err, buf, sizeof(buf));
-				ess << buf << std::endl;
-			}
-
-			throw std::runtime_error(ess.str());
+			throw std::runtime_error(error_msg());
 		}
 		for (int i = 0; i < outl; ++i)
 			ciphertext.push_back(finalblock[i]);
@@ -111,15 +87,7 @@ public:
 			NULL,
 			key_.data(),
 			iv_.data())) {
-			std::ostringstream ess;
-			ess << "EVP_DecryptInit_ex(): " << std::endl;
-			while (auto err = ERR_get_error()) {
-				char buf[256];
-				ERR_error_string_n(err, buf, sizeof(buf));
-				ess << buf << std::endl;
-			}
-
-			throw std::runtime_error(ess.str());
+			throw std::runtime_error(error_msg());
 		}
 
 		// output buffer size = inl + cipher_block_size
@@ -128,29 +96,13 @@ public:
 		int outl = 0;
 		if (1 != EVP_DecryptUpdate(&ctx, plaintext.data(), &outl,
 			ciphertext.data(), ciphertext.size())) {
-			std::ostringstream ess;
-			ess << "EVP_DecryptUpdate(): " << std::endl;
-			while (auto err = ERR_get_error()) {
-				char buf[256];
-				ERR_error_string_n(err, buf, sizeof(buf));
-				ess << buf << std::endl;
-			}
-
-			throw std::runtime_error(ess.str());
+			throw std::runtime_error(error_msg());
 		}
 		plaintext.resize(outl);
 
 		blob_t finalblock(16);
 		if (1 != EVP_DecryptFinal_ex(&ctx, finalblock.data(), &outl)) {
-			std::ostringstream ess;
-			ess << "EVP_DecryptFinal_ex(): " << std::endl;
-			while (auto err = ERR_get_error()) {
-				char buf[256];
-				ERR_error_string_n(err, buf, sizeof(buf));
-				ess << buf << std::endl;
-			}
-
-			throw std::runtime_error(ess.str());
+			throw std::runtime_error(error_msg());
 		}
 		for (int i = 0; i < outl; ++i)
 			plaintext.push_back(finalblock[i]);
@@ -159,6 +111,16 @@ public:
 	}
 
 private:
+	std::string error_msg() {
+		std::ostringstream ess;
+		while (auto err = ERR_get_error()) {
+			char buf[256];
+			ERR_error_string_n(err, buf, sizeof(buf));
+			ess << buf << std::endl;
+		}
+		return ess.str();
+	}
+
 	template <std::size_t MAXBYTES>
 	blob_t newrand(const std::size_t nbytes) {
 		if (nbytes > MAXBYTES)
@@ -167,15 +129,7 @@ private:
 		blob_t key(nbytes);
 
 		if (!RAND_bytes(key.data(), nbytes)) {
-			std::ostringstream ess;
-			ess << "RAND_bytes(): " << std::endl;
-			while (auto err = ERR_get_error()) {
-				char buf[256];
-				ERR_error_string_n(err, buf, sizeof(buf));
-				ess << buf << std::endl;
-			}
-
-			throw std::runtime_error(ess.str());
+			throw std::runtime_error(error_msg());
 		}
 		return key;
 	}
