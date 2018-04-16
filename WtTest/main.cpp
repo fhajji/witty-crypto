@@ -11,6 +11,7 @@
 #include <Wt/WTextArea.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
+#include <Wt/WComboBox.h>
 
 #include "crypto.h"
 #include <ios>
@@ -26,13 +27,16 @@ public:
 	EncDecApplication(const Wt::WEnvironment& env);
 
 private:
+	Crypto::cipher_map_t    ciphers_;
 	std::unique_ptr<Crypto> crypto_;
 
+	Wt::WComboBox *cbCiphers_;
 	Wt::WText     *keyText_;
 	Wt::WText     *ivText_;
 	Wt::WTextArea *plainTextEdit_;
 	Wt::WTextArea *cipherTextEdit_;
 
+	void newcipher();
 	void newkey();
 	void newiv();
 	void encrypt();
@@ -45,7 +49,8 @@ private:
 EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env)
 {
-	crypto_ = std::make_unique<Crypto>(EVP_aes_256_cbc());
+	ciphers_ = Crypto::CipherMap();
+	crypto_ = std::make_unique<Crypto>();
 
 	setTitle("Crypt Demo");
 	root()->setHeight(480);
@@ -53,26 +58,36 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 
 	auto grid = root()->setLayout(std::make_unique<Wt::WGridLayout>());
 
-	grid->addWidget(std::make_unique<Wt::WText>("Key"), 0, 0);
-	keyText_ = grid->addWidget(std::make_unique<Wt::WText>(), 0, 1);
-	auto buttonKey = grid->addWidget(std::make_unique<Wt::WPushButton>("Generate Key"), 0, 2);
+	grid->addWidget(std::make_unique<Wt::WText>("Cipher"), 0, 0);
+	cbCiphers_ = grid->addWidget(std::make_unique<Wt::WComboBox>(), 0, 1);
+	for (const auto &p : ciphers_) {
+		cbCiphers_->addItem(p.first);
+	}
+	cbCiphers_->setCurrentIndex(0);
+	cbCiphers_->setMargin(10, Wt::Side::CenterX);
 
-	grid->addWidget(std::make_unique<Wt::WText>("IV"), 1, 0);
-	ivText_ = grid->addWidget(std::make_unique<Wt::WText>(), 1, 1);
-	auto buttonIV = grid->addWidget(std::make_unique<Wt::WPushButton>("Generate IV"), 1, 2);
+	grid->addWidget(std::make_unique<Wt::WText>("Key"), 1, 0);
+	keyText_ = grid->addWidget(std::make_unique<Wt::WText>(), 1, 1);
+	auto buttonKey = grid->addWidget(std::make_unique<Wt::WPushButton>("Generate Key"), 1, 2);
 
-	grid->addWidget(std::make_unique<Wt::WText>("Plaintext"), 2, 0);
-	plainTextEdit_ = grid->addWidget(std::make_unique<Wt::WTextArea>(), 2, 1);
+	grid->addWidget(std::make_unique<Wt::WText>("IV"), 2, 0);
+	ivText_ = grid->addWidget(std::make_unique<Wt::WText>(), 2, 1);
+	auto buttonIV = grid->addWidget(std::make_unique<Wt::WPushButton>("Generate IV"), 2, 2);
+
+	grid->addWidget(std::make_unique<Wt::WText>("Plaintext"), 3, 0);
+	plainTextEdit_ = grid->addWidget(std::make_unique<Wt::WTextArea>(), 3, 1);
 	plainTextEdit_->setFocus();
-	auto buttonEncrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Encrypt"), 2, 2);
+	auto buttonEncrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Encrypt"), 3, 2);
 	
-	grid->addWidget(std::make_unique<Wt::WText>("Ciphertext"), 3, 0);
-	cipherTextEdit_ = grid->addWidget(std::make_unique<Wt::WTextArea>(), 3, 1);
-	auto buttonDecrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Decrypt"), 3, 2);
+	grid->addWidget(std::make_unique<Wt::WText>("Ciphertext"), 4, 0);
+	cipherTextEdit_ = grid->addWidget(std::make_unique<Wt::WTextArea>(), 4, 1);
+	auto buttonDecrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Decrypt"), 4, 2);
 
-	grid->setRowStretch(2, 1);
 	grid->setRowStretch(3, 1);
+	grid->setRowStretch(4, 1);
 	grid->setColumnStretch(1, 1);
+
+	cbCiphers_->changed().connect(this, &EncDecApplication::newcipher);
 
 	buttonKey->clicked().connect(this, &EncDecApplication::newkey);
 	buttonIV->clicked().connect(this, &EncDecApplication::newiv);
@@ -82,8 +97,7 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	plainTextEdit_->enterPressed().connect(this, &EncDecApplication::encrypt);
 	cipherTextEdit_->enterPressed().connect(this, &EncDecApplication::decrypt);
 
-	newkey(); // initialize key
-	newiv();  // initialize iv
+	newcipher(); // initialize cipher (and key and iv)
 }
 
 void EncDecApplication::newkey()
@@ -108,6 +122,14 @@ void EncDecApplication::newiv()
 	for (std::size_t i = 0; i<iv.size(); ++i)
 		oss << std::hex << static_cast<unsigned int>(iv[i]);
 	ivText_->setText(oss.str());
+}
+
+void EncDecApplication::newcipher()
+{
+	const EVP_CIPHER *cipher = ciphers_[cbCiphers_->currentText().narrow()];
+	crypto_->setCipher(cipher);
+	newkey();
+	newiv();
 }
 
 void EncDecApplication::encrypt()

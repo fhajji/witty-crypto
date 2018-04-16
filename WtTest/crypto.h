@@ -7,7 +7,9 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 
+#include <string>
 #include <vector>
+#include <map>
 #include <utility>
 #include <exception>
 
@@ -17,8 +19,9 @@ class Crypto {
 public:
 	using bytes_t = unsigned char;
 	using blob_t = std::vector<bytes_t>;
+	using cipher_map_t = std::map<std::string, const EVP_CIPHER *>;
 
-	Crypto(const EVP_CIPHER *cipher) : cipher_(cipher) {
+	Crypto(const EVP_CIPHER *cipher = nullptr) : cipher_(cipher) {
 		ERR_load_crypto_strings();
 		OpenSSL_add_all_algorithms();
 		OPENSSL_config(NULL);
@@ -30,19 +33,32 @@ public:
 		ERR_free_strings();
 	}
 
-public:
+	static const cipher_map_t CipherMap() {
+		const cipher_map_t ciphers = {
+			{ "EVP_aes_128_ecb", EVP_aes_128_ecb() },
+			{ "EVP_aes_128_cbc", EVP_aes_128_cbc() },
+			{ "EVP_aes_256_cbc", EVP_aes_256_cbc() },
+		};
+		return ciphers;
+	}
+
+	void setCipher(const EVP_CIPHER *cipher) { cipher_ = cipher; }
+
 	const blob_t key() const { return key_; }
 	const blob_t iv() const { return iv_; }
 
 	void newKey() {
+		assert(cipher_ != nullptr);
 		key_ = newrand<EVP_MAX_KEY_LENGTH>(EVP_CIPHER_key_length(cipher_));
 	}
 
 	void newIV() {
+		assert(cipher_ != nullptr);
 		iv_ = newrand<EVP_MAX_IV_LENGTH>(EVP_CIPHER_iv_length(cipher_));
 	}
 
 	blob_t encrypt(const blob_t &plaintext) {
+		assert(cipher_ != nullptr);
 		EVP_CIPHER_CTX ctx;
 		ScopeGuard guard(&ctx);
 
@@ -77,6 +93,7 @@ public:
 	}
 
 	blob_t decrypt(const blob_t &ciphertext) {
+		assert(cipher_ != nullptr);
 		EVP_CIPHER_CTX ctx;
 		ScopeGuard guard(&ctx);
 
