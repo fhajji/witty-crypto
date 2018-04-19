@@ -18,6 +18,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "hexdumpmodel.h"
+
 /*
 * A simple encryptor / decryptor.
 */
@@ -29,6 +31,8 @@ public:
 private:
 	Crypto::cipher_map_t    ciphers_;
 	std::unique_ptr<Crypto> crypto_;
+	std::unique_ptr<HexDumpTableModel> hexdump_model_pt_; // plaintext hexdump model
+	std::unique_ptr<HexDumpTableModel> hexdump_model_ct_; // ciphertext hexdump model
 
 	Wt::WComboBox *cbCiphers_;
 	Wt::WText     *keyText_;
@@ -51,6 +55,8 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 {
 	ciphers_ = Crypto::CipherMap();
 	crypto_ = std::make_unique<Crypto>();
+	hexdump_model_pt_ = std::make_unique<HexDumpTableModel>();
+	hexdump_model_ct_ = std::make_unique<HexDumpTableModel>();
 
 	setTitle("Crypt Demo");
 	root()->setHeight(480);
@@ -156,6 +162,7 @@ void EncDecApplication::encrypt()
 		ct = e.what();
 	}
 
+	hexdump_model_ct_->rescan(ct); // ciphertext has changed
 	cipherTextEdit_->setText(Wt::WString(ct));
 }
 
@@ -181,6 +188,7 @@ void EncDecApplication::decrypt()
 		pt = e.what();
 	}
 
+	hexdump_model_pt_->rescan(pt); // plaintext has changed
 	plainTextEdit_->setText(Wt::WString(pt));
 }
 

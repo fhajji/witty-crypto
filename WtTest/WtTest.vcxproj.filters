@@ -18,12 +18,21 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="hexdump.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crypto.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="scopeguard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hexdump.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hexdumpmodel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
