@@ -82,6 +82,8 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	auto buttonIV = grid->addWidget(std::make_unique<Wt::WPushButton>("Generate IV"), 2, 2);
 
 	grid->addWidget(std::make_unique<Wt::WText>("Plaintext"), 3, 0);
+	// plainTextEdit_ = grid->addWidget(std::make_unique<Wt::WTextArea>(), 3, 1);
+	// plainTextEdit_->setFocus();
 	auto tw_plain = grid->addWidget(std::make_unique<Wt::WTabWidget>(), 3, 1);
 	tw_plain->addTab(std::make_unique<Wt::WTextArea>(),
 		"Plaintext", Wt::ContentLoading::Eager);
@@ -94,6 +96,7 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	auto buttonEncrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Encrypt"), 3, 2);
 	
 	grid->addWidget(std::make_unique<Wt::WText>("Ciphertext"), 4, 0);
+	// cipherTextEdit_ = grid->addWidget(std::make_unique<Wt::WTextArea>(), 4, 1);
 	auto tw_cipher = grid->addWidget(std::make_unique<Wt::WTabWidget>(), 4, 1);
 	tw_cipher->addTab(std::make_unique<Wt::WTextArea>(),
 		"Ciphertext", Wt::ContentLoading::Eager);
