@@ -59,6 +59,7 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	hexdump_model_pt_ = std::make_unique<HexDumpTableModel>();
 	hexdump_model_ct_ = std::make_unique<HexDumpTableModel>();
 
+	useStyleSheet("WtTest.css");
 	setTitle("Crypt Demo");
 	root()->setHeight(480);
 	root()->setWidth(800);
