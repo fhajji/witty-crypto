@@ -137,6 +137,14 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	grid->setRowStretch(4, 1);
 	grid->setColumnStretch(1, 1);
 
+	plainTextHDView_->setColumnWidth(0, 80);   // addr
+	plainTextHDView_->setColumnWidth(1, 350);  // hex
+	plainTextHDView_->setColumnWidth(2, 150);  // print
+
+	cipherTextHDView_->setColumnWidth(0, 80);   // addr
+	cipherTextHDView_->setColumnWidth(1, 350);  // hex
+	cipherTextHDView_->setColumnWidth(2, 150);  // print
+
 	cbCiphers_->changed().connect(this, &EncDecApplication::newcipher);
 
 	buttonKey->clicked().connect(this, &EncDecApplication::newkey);
