@@ -1,3 +1,7 @@
 .Wt-stack textarea {
     width: 100%;
 }
+
+.Wt-tv-c {
+    font-family: 'Courier New', monospace;
+}
