@@ -132,6 +132,13 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	plainTextEdit_->enterPressed().connect(this, &EncDecApplication::encrypt);
 	cipherTextEdit_->enterPressed().connect(this, &EncDecApplication::decrypt);
 
+	tw_plain->currentChanged().connect([=](int newTabIdx){
+		tw_plain->setCurrentIndex(newTabIdx); // XXX no visible effect. Why?
+	});
+	tw_cipher->currentChanged().connect([=](int newTabIdx) {
+		tw_cipher->setCurrentIndex(newTabIdx); // XXX no visible effect. Why?
+	});
+
 	newcipher(); // initialize cipher (and key and iv)
 }
 
