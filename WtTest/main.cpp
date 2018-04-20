@@ -194,11 +194,13 @@ void EncDecApplication::newcipher()
 void EncDecApplication::updatePlainText()
 {
 	thePlainText_ = Crypto::toBytes(plainTextEdit_->text().narrow());
+	hexdump_model_pt_->rescan(thePlainText_);
 }
 
 void EncDecApplication::updateCipherText()
 {
 	theCipherText_ = Crypto::toBytes(cipherTextEdit_->text().narrow());
+	hexdump_model_ct_->rescan(theCipherText_);
 }
 
 void EncDecApplication::encrypt()

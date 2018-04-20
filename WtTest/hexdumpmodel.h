@@ -65,6 +65,8 @@ public:
 		addr_.assign(addr_list.cbegin(), addr_list.cend());
 		hex_.assign(hex_list.cbegin(), hex_list.cend());
 		print_.assign(print_list.cbegin(), print_list.cend());
+
+		reset(); // send modelReset() signal to all attached views.
 	}
 
 private:
