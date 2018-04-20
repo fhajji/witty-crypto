@@ -16,7 +16,7 @@ class HexDumpTableModel : public Wt::WAbstractTableModel
 public:
 	HexDumpTableModel() :
 		Wt::WAbstractTableModel() {
-		dumper_ = HexDump();
+		dumper_ = HexDump<std::vector<std::string>>();
 	}
 
 	virtual int rowCount(const Wt::WModelIndex &parent = Wt::WModelIndex()) const {
@@ -57,20 +57,15 @@ public:
 	void rescan(const Crypto::Bytes &input) {
 		auto instr = Crypto::toString(input);
 
-		auto addr_list = dumper_.toaddr(instr);
-		auto hex_list = dumper_.tohex(instr);
-		auto print_list = dumper_.toprint(instr);
-
-		// convert std::list<> to std::vector<>
-		addr_.assign(addr_list.cbegin(), addr_list.cend());
-		hex_.assign(hex_list.cbegin(), hex_list.cend());
-		print_.assign(print_list.cbegin(), print_list.cend());
+		addr_  = dumper_.toaddr(instr);
+		hex_   = dumper_.tohex(instr);
+		print_ = dumper_.toprint(instr);
 
 		reset(); // send modelReset() signal to all attached views.
 	}
 
 private:
-	HexDump dumper_;
+	HexDump<std::vector<std::string>> dumper_;
 	std::vector<std::string> addr_;
 	std::vector<std::string> hex_;
 	std::vector<std::string> print_;
