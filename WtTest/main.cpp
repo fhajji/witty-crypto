@@ -40,8 +40,8 @@ public:
 private:
 	Crypto::cipher_map_t    ciphers_;
 	std::unique_ptr<Crypto> crypto_;
-	std::shared_ptr<HexDumpTableModel> hexdump_model_pt_; // plaintext hexdump model
-	std::shared_ptr<HexDumpTableModel> hexdump_model_ct_; // ciphertext hexdump model
+	const std::shared_ptr<HexDumpTableModel> hexdump_model_pt_; // plaintext hexdump model
+	const std::shared_ptr<HexDumpTableModel> hexdump_model_ct_; // ciphertext hexdump model
 
 	// our application data
 	const EVP_CIPHER *theCipher_;
@@ -74,12 +74,12 @@ private:
 * Create the GUI
 */
 EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
-	: WApplication(env)
+	: WApplication(env),
+	hexdump_model_pt_(std::make_shared<HexDumpTableModel>()),
+	hexdump_model_ct_(std::make_shared<HexDumpTableModel>())
 {
 	ciphers_ = Crypto::CipherMap();
 	crypto_ = std::make_unique<Crypto>();
-	hexdump_model_pt_ = std::make_shared<HexDumpTableModel>();
-	hexdump_model_ct_ = std::make_shared<HexDumpTableModel>();
 
 	useStyleSheet("WtTest.css");
 	setTitle("Crypt Demo");
