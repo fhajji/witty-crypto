@@ -3,6 +3,10 @@
 * Copyright (C) 2018 Farid Hajji <farid@hajji.name>
 */
 
+// squelch msvs-2017 annoying dll-interface warnings
+#pragma warning ( disable: 4251 )
+#pragma warning ( disable: 4275 )
+
 #include <Wt/WApplication.h>
 #include <Wt/WBreak.h>
 #include <Wt/WContainerWidget.h>

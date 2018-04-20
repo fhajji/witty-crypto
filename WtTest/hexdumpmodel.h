@@ -21,7 +21,7 @@ public:
 
 	virtual int rowCount(const Wt::WModelIndex &parent = Wt::WModelIndex()) const {
 		if (!parent.isValid())
-			return addr_.size();
+			return static_cast<int>(addr_.size());
 		else
 			return 0;
 	}

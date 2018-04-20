@@ -76,7 +76,7 @@ public:
 
 		int outl = 0;
 		if (1 != EVP_EncryptUpdate(&ctx, ciphertext.data(), &outl,
-			plaintext.data(), plaintext.size())) {
+			plaintext.data(), static_cast<int>(plaintext.size()))) {
 			throw std::runtime_error(error_msg());
 		}
 		ciphertext.resize(outl);
@@ -111,7 +111,7 @@ public:
 
 		int outl = 0;
 		if (1 != EVP_DecryptUpdate(&ctx, plaintext.data(), &outl,
-			ciphertext.data(), ciphertext.size())) {
+			ciphertext.data(), static_cast<int>(ciphertext.size()))) {
 			throw std::runtime_error(error_msg());
 		}
 		plaintext.resize(outl);
@@ -158,7 +158,7 @@ private:
 
 		Bytes key(nbytes);
 
-		if (!RAND_bytes(key.data(), nbytes)) {
+		if (!RAND_bytes(key.data(), static_cast<int>(nbytes))) {
 			throw std::runtime_error(error_msg());
 		}
 		return key;
