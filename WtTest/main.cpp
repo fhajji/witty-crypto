@@ -14,12 +14,14 @@
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
 #include <Wt/WComboBox.h>
+#include <Wt/WTableView.h>
 
 #include "crypto.h"
 #include <map>
 #include <ios>
 #include <sstream>
 #include <iomanip>
+#include <memory>
 
 #include "hexdumpmodel.h"
 
@@ -34,8 +36,8 @@ public:
 private:
 	Crypto::cipher_map_t    ciphers_;
 	std::unique_ptr<Crypto> crypto_;
-	std::unique_ptr<HexDumpTableModel> hexdump_model_pt_; // plaintext hexdump model
-	std::unique_ptr<HexDumpTableModel> hexdump_model_ct_; // ciphertext hexdump model
+	std::shared_ptr<HexDumpTableModel> hexdump_model_pt_; // plaintext hexdump model
+	std::shared_ptr<HexDumpTableModel> hexdump_model_ct_; // ciphertext hexdump model
 
 	// our application data
 	const EVP_CIPHER *theCipher_;
@@ -50,6 +52,8 @@ private:
 	Wt::WText     *ivText_;
 	Wt::WTextArea *plainTextEdit_;
 	Wt::WTextArea *cipherTextEdit_;
+	Wt::WTableView *plainTextHDView_;
+	Wt::WTableView *cipherTextHDView_;
 
 	std::map<Wt::WMenuItem *, Wt::WWidget *> mitems_;
 
@@ -70,8 +74,8 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 {
 	ciphers_ = Crypto::CipherMap();
 	crypto_ = std::make_unique<Crypto>();
-	hexdump_model_pt_ = std::make_unique<HexDumpTableModel>();
-	hexdump_model_ct_ = std::make_unique<HexDumpTableModel>();
+	hexdump_model_pt_ = std::make_shared<HexDumpTableModel>();
+	hexdump_model_ct_ = std::make_shared<HexDumpTableModel>();
 
 	useStyleSheet("WtTest.css");
 	setTitle("Crypt Demo");
@@ -100,15 +104,16 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	auto tw_plain = grid->addWidget(std::make_unique<Wt::WTabWidget>(), 3, 1);
 	auto mi_ptta = tw_plain->addTab(std::make_unique<Wt::WTextArea>(),
 		"Plaintext", Wt::ContentLoading::Eager);
-	auto mi_pthd = tw_plain->addTab(std::make_unique<Wt::WText>("Hexdump goes here"),
+	auto mi_pthd = tw_plain->addTab(std::make_unique<Wt::WTableView>(),
 		"Hexdump", Wt::ContentLoading::Eager);
-	
 	tw_plain->setStyleClass("tabwidget");
-	plainTextEdit_ = static_cast<Wt::WTextArea *>(tw_plain->widget(0));
-	plainTextEdit_->setFocus();
-
 	mitems_[mi_ptta] = tw_plain->widget(0);
 	mitems_[mi_pthd] = tw_plain->widget(1);
+
+	plainTextEdit_ = static_cast<Wt::WTextArea *>(mitems_[mi_ptta]);
+	plainTextEdit_->setFocus();
+	plainTextHDView_ = static_cast<Wt::WTableView *>(mitems_[mi_pthd]);
+	plainTextHDView_->setModel(hexdump_model_pt_);
 
 	auto buttonEncrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Encrypt"), 3, 2);
 	
@@ -116,13 +121,15 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	auto tw_cipher = grid->addWidget(std::make_unique<Wt::WTabWidget>(), 4, 1);
 	auto mi_cita = tw_cipher->addTab(std::make_unique<Wt::WTextArea>(),
 		"Ciphertext", Wt::ContentLoading::Eager);
-	auto mi_cihd = tw_cipher->addTab(std::make_unique<Wt::WText>("Hexdump goes here"),
+	auto mi_cihd = tw_cipher->addTab(std::make_unique<Wt::WTableView>(),
 		"Hexdump", Wt::ContentLoading::Eager);
 	tw_cipher->setStyleClass("tabwidget");
-	cipherTextEdit_ = static_cast<Wt::WTextArea *>(tw_cipher->widget(0));
-
 	mitems_[mi_cita] = tw_cipher->widget(0);
 	mitems_[mi_cihd] = tw_cipher->widget(1);
+
+	cipherTextEdit_ = static_cast<Wt::WTextArea *>(mitems_[mi_cita]);
+	cipherTextHDView_ = static_cast<Wt::WTableView *>(mitems_[mi_cihd]);
+	cipherTextHDView_->setModel(hexdump_model_ct_);
 
 	auto buttonDecrypt = grid->addWidget(std::make_unique<Wt::WPushButton>("Decrypt"), 4, 2);
 
