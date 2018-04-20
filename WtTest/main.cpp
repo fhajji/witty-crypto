@@ -8,7 +8,6 @@
 #include <Wt/WContainerWidget.h>
 #include <Wt/WGridLayout.h>
 #include <Wt/WTabWidget.h>
-#include <Wt/WMenuItem.h>
 #include <Wt/WLineEdit.h>
 #include <Wt/WTextArea.h>
 #include <Wt/WPushButton.h>
@@ -19,7 +18,6 @@
 #include <ios>
 #include <sstream>
 #include <iomanip>
-#include <vector>
 
 #include "hexdumpmodel.h"
 
@@ -50,9 +48,6 @@ private:
 	Wt::WText     *ivText_;
 	Wt::WTextArea *plainTextEdit_;
 	Wt::WTextArea *cipherTextEdit_;
-
-	std::vector<Wt::WMenuItem *> plainTabMenuItems_;
-	std::vector<Wt::WMenuItem *> cipherTabMenuItems_;
 
 	void newcipher();
 	void newkey();
@@ -99,10 +94,10 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 
 	grid->addWidget(std::make_unique<Wt::WText>("Plaintext"), 3, 0);
 	auto tw_plain = grid->addWidget(std::make_unique<Wt::WTabWidget>(), 3, 1);
-	plainTabMenuItems_.push_back(tw_plain->addTab(std::make_unique<Wt::WTextArea>(),
-		"Plaintext", Wt::ContentLoading::Eager));
-	plainTabMenuItems_.push_back(tw_plain->addTab(std::make_unique<Wt::WText>("Hexdump goes here"),
-		"Hexdump", Wt::ContentLoading::Eager));
+	tw_plain->addTab(std::make_unique<Wt::WTextArea>(),
+		"Plaintext", Wt::ContentLoading::Eager);
+	tw_plain->addTab(std::make_unique<Wt::WText>("Hexdump goes here"),
+		"Hexdump", Wt::ContentLoading::Eager);
 	tw_plain->setStyleClass("tabwidget");
 	plainTextEdit_ = static_cast<Wt::WTextArea *>(tw_plain->widget(0));
 	plainTextEdit_->setFocus();
@@ -111,10 +106,10 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	
 	grid->addWidget(std::make_unique<Wt::WText>("Ciphertext"), 4, 0);
 	auto tw_cipher = grid->addWidget(std::make_unique<Wt::WTabWidget>(), 4, 1);
-	cipherTabMenuItems_.push_back(tw_cipher->addTab(std::make_unique<Wt::WTextArea>(),
-		"Ciphertext", Wt::ContentLoading::Eager));
-	cipherTabMenuItems_.push_back(tw_cipher->addTab(std::make_unique<Wt::WText>("Hexdump goes here"),
-		"Hexdump", Wt::ContentLoading::Eager));
+	tw_cipher->addTab(std::make_unique<Wt::WTextArea>(),
+		"Ciphertext", Wt::ContentLoading::Eager);
+	tw_cipher->addTab(std::make_unique<Wt::WText>("Hexdump goes here"),
+		"Hexdump", Wt::ContentLoading::Eager);
 	tw_cipher->setStyleClass("tabwidget");
 	cipherTextEdit_ = static_cast<Wt::WTextArea *>(tw_cipher->widget(0));
 
@@ -139,11 +134,15 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 
 	tw_plain->currentChanged().connect([=](int newTabIdx){
 		tw_plain->setCurrentIndex(newTabIdx); // XXX no visible effect. Why?
-		plainTabMenuItems_.at(newTabIdx)->addStyleClass("active");
+		// still need some action here:
+		//   textarea and span widgets are then both w/ style "display: none"
+		//   how to trigger display of current tab's widget?
 	});
 	tw_cipher->currentChanged().connect([=](int newTabIdx) {
 		tw_cipher->setCurrentIndex(newTabIdx); // XXX no visible effect. Why?
-		cipherTabMenuItems_.at(newTabIdx)->addStyleClass("active");
+		// still need some action here
+		//    textarea and span widgetr are then both w/ style "display: none"
+		//    how to trigger display of current tab's widget?
 	});
 
 	newcipher(); // initialize cipher (and key and iv)
