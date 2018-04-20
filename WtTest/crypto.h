@@ -17,8 +17,7 @@
 
 class Crypto {
 public:
-	using bytes_t = unsigned char;
-	using blob_t = std::vector<bytes_t>;
+	using Bytes = std::vector<unsigned char>;
 	using cipher_map_t = std::map<std::string, const EVP_CIPHER *>;
 
 	Crypto(const EVP_CIPHER *cipher = nullptr) : cipher_(cipher) {
@@ -44,8 +43,8 @@ public:
 
 	void setCipher(const EVP_CIPHER *cipher) { cipher_ = cipher; }
 
-	const blob_t key() const { return key_; }
-	const blob_t iv() const { return iv_; }
+	const Bytes key() const { return key_; }
+	const Bytes iv() const { return iv_; }
 
 	void newKey() {
 		assert(cipher_ != nullptr);
@@ -57,7 +56,7 @@ public:
 		iv_ = newrand<EVP_MAX_IV_LENGTH>(EVP_CIPHER_iv_length(cipher_));
 	}
 
-	blob_t encrypt(const blob_t &plaintext) {
+	Bytes encrypt(const Bytes &plaintext) {
 		assert(cipher_ != nullptr);
 		EVP_CIPHER_CTX ctx;
 		ScopeGuard guard(&ctx);
@@ -73,7 +72,7 @@ public:
 		}
 
 		// output buffer size = inl + cipher_block_size - 1
-		blob_t ciphertext(plaintext.size() + 16 - 1);
+		Bytes ciphertext(plaintext.size() + 16 - 1);
 
 		int outl = 0;
 		if (1 != EVP_EncryptUpdate(&ctx, ciphertext.data(), &outl,
@@ -82,7 +81,7 @@ public:
 		}
 		ciphertext.resize(outl);
 
-		blob_t finalblock(16);
+		Bytes finalblock(16);
 		if (1 != EVP_EncryptFinal_ex(&ctx, finalblock.data(), &outl)) {
 			throw std::runtime_error(error_msg());
 		}
@@ -92,7 +91,7 @@ public:
 		return ciphertext;
 	}
 
-	blob_t decrypt(const blob_t &ciphertext) {
+	Bytes decrypt(const Bytes &ciphertext) {
 		assert(cipher_ != nullptr);
 		EVP_CIPHER_CTX ctx;
 		ScopeGuard guard(&ctx);
@@ -108,7 +107,7 @@ public:
 		}
 
 		// output buffer size = inl + cipher_block_size
-		blob_t plaintext(ciphertext.size() + 16);
+		Bytes plaintext(ciphertext.size() + 16);
 
 		int outl = 0;
 		if (1 != EVP_DecryptUpdate(&ctx, plaintext.data(), &outl,
@@ -117,7 +116,7 @@ public:
 		}
 		plaintext.resize(outl);
 
-		blob_t finalblock(16);
+		Bytes finalblock(16);
 		if (1 != EVP_DecryptFinal_ex(&ctx, finalblock.data(), &outl)) {
 			throw std::runtime_error(error_msg());
 		}
@@ -125,6 +124,20 @@ public:
 			plaintext.push_back(finalblock[i]);
 
 		return plaintext;
+	}
+
+	static std::string toString(const Bytes &input) {
+		std::string out;
+		for (const auto &byte : input)
+			out.push_back(static_cast<char>(byte));
+		return out;
+	}
+
+	static Bytes toBytes(const std::string &input) {
+		Bytes out;
+		for (const auto &c : input)
+			out.push_back(static_cast<unsigned char>(c));
+		return out;
 	}
 
 private:
@@ -139,11 +152,11 @@ private:
 	}
 
 	template <std::size_t MAXBYTES>
-	blob_t newrand(const std::size_t nbytes) {
+	Bytes newrand(const std::size_t nbytes) {
 		if (nbytes > MAXBYTES)
 			throw std::out_of_range("Key/IV too long");
 
-		blob_t key(nbytes);
+		Bytes key(nbytes);
 
 		if (!RAND_bytes(key.data(), nbytes)) {
 			throw std::runtime_error(error_msg());
@@ -152,6 +165,6 @@ private:
 	}
 
 	const EVP_CIPHER *cipher_;
-	blob_t key_;
-	blob_t iv_;
+	Bytes key_;
+	Bytes iv_;
 };

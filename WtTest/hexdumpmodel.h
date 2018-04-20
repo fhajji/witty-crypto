@@ -14,10 +14,9 @@
 class HexDumpTableModel : public Wt::WAbstractTableModel
 {
 public:
-	HexDumpTableModel(const std::string &input = "") :
+	HexDumpTableModel() :
 		Wt::WAbstractTableModel() {
 		dumper_ = HexDump();
-		rescan(input);
 	}
 
 	virtual int rowCount(const Wt::WModelIndex &parent = Wt::WModelIndex()) const {
@@ -55,11 +54,14 @@ public:
 		}
 	}
 
-	void rescan(const std::string &input) {
-		auto addr_list = dumper_.toaddr(input);
-		auto hex_list = dumper_.tohex(input);
-		auto print_list = dumper_.toprint(input);
+	void rescan(const Crypto::Bytes &input) {
+		auto instr = Crypto::toString(input);
 
+		auto addr_list = dumper_.toaddr(instr);
+		auto hex_list = dumper_.tohex(instr);
+		auto print_list = dumper_.toprint(instr);
+
+		// convert std::list<> to std::vector<>
 		addr_.assign(addr_list.cbegin(), addr_list.cend());
 		hex_.assign(hex_list.cbegin(), hex_list.cend());
 		print_.assign(print_list.cbegin(), print_list.cend());

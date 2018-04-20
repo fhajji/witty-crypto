@@ -35,6 +35,14 @@ private:
 	std::unique_ptr<HexDumpTableModel> hexdump_model_pt_; // plaintext hexdump model
 	std::unique_ptr<HexDumpTableModel> hexdump_model_ct_; // ciphertext hexdump model
 
+	// our application data
+	const EVP_CIPHER *theCipher_;
+	Crypto::Bytes theKey_;
+	Crypto::Bytes theIV_;
+	Crypto::Bytes thePlainText_;
+	Crypto::Bytes theCipherText_;
+
+	// widgets displaying our application data
 	Wt::WComboBox *cbCiphers_;
 	Wt::WText     *keyText_;
 	Wt::WText     *ivText_;
@@ -44,6 +52,8 @@ private:
 	void newcipher();
 	void newkey();
 	void newiv();
+	void updatePlainText();
+	void updateCipherText();
 	void encrypt();
 	void decrypt();
 };
@@ -116,6 +126,9 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	buttonEncrypt->clicked().connect(this, &EncDecApplication::encrypt);
 	buttonDecrypt->clicked().connect(this, &EncDecApplication::decrypt);
 
+	plainTextEdit_->changed().connect(this, &EncDecApplication::updatePlainText);
+	cipherTextEdit_->changed().connect(this, &EncDecApplication::updateCipherText);
+
 	plainTextEdit_->enterPressed().connect(this, &EncDecApplication::encrypt);
 	cipherTextEdit_->enterPressed().connect(this, &EncDecApplication::decrypt);
 
@@ -126,11 +139,11 @@ void EncDecApplication::newkey()
 {
 	// generate a new random key
 	crypto_->newKey();
+	theKey_ = crypto_->key();
 
 	std::ostringstream oss;
-	auto key = crypto_->key();
-	for (std::size_t i = 0; i<key.size(); ++i)
-		oss << std::hex << static_cast<unsigned int>(key[i]);
+	for (std::size_t i = 0; i<theKey_.size(); ++i)
+		oss << std::hex << static_cast<unsigned int>(theKey_[i]);
 	keyText_->setText(oss.str());
 }
 
@@ -138,74 +151,78 @@ void EncDecApplication::newiv()
 {
 	// generate a new random IV
 	crypto_->newIV();
+	theIV_ = crypto_->iv();
 
 	std::ostringstream oss;
-	auto iv = crypto_->iv();
-	for (std::size_t i = 0; i<iv.size(); ++i)
-		oss << std::hex << static_cast<unsigned int>(iv[i]);
+	for (std::size_t i = 0; i<theIV_.size(); ++i)
+		oss << std::hex << static_cast<unsigned int>(theIV_[i]);
 	ivText_->setText(oss.str());
 }
 
 void EncDecApplication::newcipher()
 {
-	const EVP_CIPHER *cipher = ciphers_[cbCiphers_->currentText().narrow()];
-	crypto_->setCipher(cipher);
+	theCipher_ = ciphers_[cbCiphers_->currentText().narrow()];
+	crypto_->setCipher(theCipher_);
 	newkey();
 	newiv();
 }
 
+void EncDecApplication::updatePlainText()
+{
+	thePlainText_ = Crypto::toBytes(plainTextEdit_->text().narrow());
+}
+
+void EncDecApplication::updateCipherText()
+{
+	theCipherText_ = Crypto::toBytes(cipherTextEdit_->text().narrow());
+}
+
 void EncDecApplication::encrypt()
 {
-	auto wPlain{ plainTextEdit_->text().narrow() };
-	Crypto::blob_t plaintext(wPlain.cbegin(), wPlain.cend());
+	// assume that our thePlainText_ is already synchronized
+	// with plainTextEdit_
 
-	Crypto::blob_t ciphertext;
-	std::string ct;
+	// first, get the new plaintext from the widget:
+	// auto wPlain{ plainTextEdit_->text().narrow() };
+	// thePlainText_.assign(wPlain.cbegin(), wPlain.cend())
+	// Crypto::blob_t plaintext(wPlain.cbegin(), wPlain.cend());
 
 	try {
-		ciphertext = crypto_->encrypt(plaintext);
-		// output the ciphertext as (lossless) hex
-		std::ostringstream oss;
-		oss << std::hex << std::setfill('0');
-
-		for (const unsigned char c : ciphertext) {
-			oss << std::setw(2) << static_cast<unsigned int>(c) << " ";
-		}
-		ct.assign(oss.str());
+		theCipherText_ = crypto_->encrypt(thePlainText_);
 	}
 	catch (std::runtime_error &e) {
 		// output error message instead
-		ct = e.what();
+		theCipherText_ = Crypto::toBytes(e.what());
 	}
 
-	hexdump_model_ct_->rescan(ct); // ciphertext has changed
-	cipherTextEdit_->setText(Wt::WString(ct));
+	hexdump_model_ct_->rescan(theCipherText_); // ciphertext has changed
+	cipherTextEdit_->setText(Wt::WString(Crypto::toString(theCipherText_)));
 }
 
 void EncDecApplication::decrypt()
 {
-	auto wCipher{ cipherTextEdit_->text().narrow() };
-	Crypto::blob_t ciphertext;
+	// assume that our theCipherText_ is already synchronized
+	// with cipherTextEdit_
 
-	std::istringstream iss(wCipher);
-	unsigned int c;
-	while (iss >> std::hex >> c) {
-		ciphertext.push_back(static_cast<unsigned char>(c));
-	}
+	// first, get the new ciphertext from the widget:
+	// auto wCipher{ cipherTextEdit_->text().narrow() };
+	// Crypto::blob_t ciphertext;
 
-	Crypto::blob_t plaintext;
-	std::string pt;
+	// std::istringstream iss(Crypto::toString(theCipherText_));
+	// unsigned int c;
+	// while (iss >> std::hex >> c) {
+	// 	ciphertext.push_back(static_cast<unsigned char>(c));
+	// }
 
 	try {
-		plaintext = crypto_->decrypt(ciphertext);
-		pt.assign(plaintext.cbegin(), plaintext.cend());
+		thePlainText_ = crypto_->decrypt(theCipherText_);
 	}
 	catch (std::runtime_error &e) {
-		pt = e.what();
+		thePlainText_ = Crypto::toBytes(e.what());
 	}
 
-	hexdump_model_pt_->rescan(pt); // plaintext has changed
-	plainTextEdit_->setText(Wt::WString(pt));
+	hexdump_model_pt_->rescan(thePlainText_); // plaintext has changed
+	plainTextEdit_->setText(Wt::WString(Crypto::toString(thePlainText_)));
 }
 
 int main(int argc, char **argv)
