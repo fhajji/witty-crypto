@@ -18,57 +18,73 @@ public:
 	EncDecModel() :
 		cryptor_(std::make_unique<Crypto>()),
 		ciphers_(Crypto::CipherMap()) {
-
+		cipherChanged_.connect([=] { setKeyIV(); });
+		keyChanged_.connect([=]() { encrypt(); });
+		ivChanged_.connect([=]() { encrypt(); });
+		keyivChanged_.connect([=]() { encrypt(); });
+		plaintextChanged().connect([=]() { encrypt(); });
+		// circular calls if you do this:
+		// ciphertextChanged().connect([=]() { decrypt(); });
 	}
 
 	Wt::Signal<std::string>& cipherChanged() { return cipherChanged_; }
 	Wt::Signal<std::string>& keyChanged() { return keyChanged_; }
 	Wt::Signal<std::string>& ivChanged() { return ivChanged_; }
+	Wt::Signal<std::string, std::string>& keyivChanged() { return keyivChanged_; }
 	Wt::Signal<std::string>& plaintextChanged() { return plaintextChanged_; }
 	Wt::Signal<std::string>& ciphertextChanged() { return ciphertextChanged_; }
 
 	const Crypto::cipher_map_t ciphers() const { return ciphers_; }
 
-	bool setCipher(const std::string &cipher) {
+	void setCipher(const std::string &cipher) {
 		cryptor_->setCipher(ciphers_[cipher]);
 		cipher_str_ = cipher;
 		cipherChanged_.emit(cipher);
-		return true;
 	}
 	const std::string cipher() const { return cipher_str_; }
 
-	bool setKey(/* const Crypto::Bytes & newKey */) {
+	void setKey(/* const Crypto::Bytes & newKey */) {
 		cryptor_->newKey();
 		key_ = cryptor_->key();
 		key_str_ = bytesToHex(key_);
 		keyChanged_.emit(key_str_);
-		return true;
 	}
 	const std::string key() const { return key_str_; }
 
-	bool setIV(/* const Crypto::Bytes & newIV */) {
+	void setIV(/* const Crypto::Bytes & newIV */) {
 		cryptor_->newIV();
 		iv_ = cryptor_->iv();
 		iv_str_ = bytesToHex(iv_);
 		ivChanged_.emit(iv_str_);
-		return true;
 	}
 	const std::string iv() const { return iv_str_; }
 
-	bool setPlaintext(const Crypto::Bytes &plaintext) {
+	void setKeyIV() {
+		// set key and iv simultaneously
+
+		cryptor_->newKey();
+		key_ = cryptor_->key();
+		key_str_ = bytesToHex(key_);
+
+		cryptor_->newIV();
+		iv_ = cryptor_->iv();
+		iv_str_ = bytesToHex(iv_);
+
+		keyivChanged_.emit(key_str_, iv_str_);
+	}
+
+	void setPlaintext(const Crypto::Bytes &plaintext) {
 		plaintext_ = plaintext;
 		plaintext_str_ = Crypto::toString(plaintext_);
 		plaintextChanged_.emit(plaintext_str_);
-		return true;
 	}
 	const std::string plaintext_str() const { return plaintext_str_; }
 	const Crypto::Bytes plaintext() const { return plaintext_; }
 
-	bool setCiphertext(const Crypto::Bytes &ciphertext) {
+	void setCiphertext(const Crypto::Bytes &ciphertext) {
 		ciphertext_ = ciphertext;
 		ciphertext_str_ = bytesToHex(ciphertext_);
 		ciphertextChanged_.emit(ciphertext_str_);
-		return true;
 	}
 	const std::string ciphertext_str() const { return ciphertext_str_; }
 	const Crypto::Bytes ciphertext() const { return ciphertext_; }
@@ -125,6 +141,7 @@ private:
 	Wt::Signal<std::string> cipherChanged_;
 	Wt::Signal<std::string> keyChanged_;
 	Wt::Signal<std::string> ivChanged_;
+	Wt::Signal<std::string, std::string> keyivChanged_;
 	Wt::Signal<std::string> plaintextChanged_;
 	Wt::Signal<std::string> ciphertextChanged_;
 };
