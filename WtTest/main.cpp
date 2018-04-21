@@ -149,6 +149,9 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	cipherTextHDView_->setColumnWidth(1, 350);  // hex
 	cipherTextHDView_->setColumnWidth(2, 150);  // print
 
+	plainTextHDView_->setEditTriggers(Wt::EditTrigger::SingleClicked);
+	cipherTextHDView_->setEditTriggers(Wt::EditTrigger::SingleClicked);
+
 	cbCiphers_->changed().connect(this, &EncDecApplication::newcipher);
 
 	buttonKey->clicked().connect(this, &EncDecApplication::newkey);
@@ -220,11 +223,6 @@ void EncDecApplication::encrypt()
 	// assume that our thePlainText_ is already synchronized
 	// with plainTextEdit_
 
-	// first, get the new plaintext from the widget:
-	// auto wPlain{ plainTextEdit_->text().narrow() };
-	// thePlainText_.assign(wPlain.cbegin(), wPlain.cend())
-	// Crypto::blob_t plaintext(wPlain.cbegin(), wPlain.cend());
-
 	try {
 		theCipherText_ = crypto_->encrypt(thePlainText_);
 	}
@@ -239,18 +237,8 @@ void EncDecApplication::encrypt()
 
 void EncDecApplication::decrypt()
 {
-	// assume that our theCipherText_ is already synchronized
+	// assume theCipherText_ is already synchronized
 	// with cipherTextEdit_
-
-	// first, get the new ciphertext from the widget:
-	// auto wCipher{ cipherTextEdit_->text().narrow() };
-	// Crypto::blob_t ciphertext;
-
-	// std::istringstream iss(Crypto::toString(theCipherText_));
-	// unsigned int c;
-	// while (iss >> std::hex >> c) {
-	// 	ciphertext.push_back(static_cast<unsigned char>(c));
-	// }
 
 	try {
 		thePlainText_ = crypto_->decrypt(theCipherText_);

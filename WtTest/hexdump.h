@@ -33,6 +33,8 @@ public:
 	Lines tohex(const std::string &input);
 	Lines toprint(const std::string &input);
 
+	std::string hexlines_to_string(const Lines &hexlines);
+
 	std::string dump(const std::string &input);
 
 protected:
@@ -130,6 +132,22 @@ typename HexDump<Container>::Lines HexDump<Container>::toprint(const std::string
 		result.push_back(oss.str());
 
 	return result;
+}
+
+template<class Container>
+std::string HexDump<Container>::hexlines_to_string(const Lines &hexlines)
+{
+	std::ostringstream oss;
+
+	for (const auto &line : hexlines) {
+		std::istringstream iss(line);
+		unsigned int c;
+		while (iss >> std::hex >> c) {
+			oss << static_cast<unsigned char>(c);
+		}
+	}
+
+	return oss.str();
 }
 
 template <class Container>

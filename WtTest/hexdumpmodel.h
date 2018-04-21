@@ -19,23 +19,21 @@ public:
 		dumper_ = HexDump<std::vector<std::string>>();
 	}
 
-	virtual int rowCount(const Wt::WModelIndex &parent = Wt::WModelIndex()) const {
+	int rowCount(const Wt::WModelIndex &parent = Wt::WModelIndex()) const override {
 		if (!parent.isValid())
 			return static_cast<int>(addr_.size());
 		else
 			return 0;
 	}
 
-	virtual int columnCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const
-	{
+	int columnCount(const Wt::WModelIndex& parent = Wt::WModelIndex()) const override {
 		if (!parent.isValid())
 			return 3; // addr, hex, print
 		else
 			return 0;
 	}
 
-	virtual Wt::cpp17::any data(const Wt::WModelIndex& index, Wt::ItemDataRole role = Wt::ItemDataRole::Display) const
-	{
+	Wt::cpp17::any data(const Wt::WModelIndex& index, Wt::ItemDataRole role = Wt::ItemDataRole::Display) const override {
 		switch (role.value()) {
 		case Wt::ItemDataRole::Display:
 			switch (index.column()) {
@@ -51,6 +49,56 @@ public:
 		
 		default:
 			return Wt::cpp17::any();
+		}
+	}
+
+	bool setData(const Wt::WModelIndex& index, const Wt::cpp17::any &value, Wt::ItemDataRole role = Wt::ItemDataRole::Edit) override {
+		std::string value_str, str_from_hex, str_to_print;
+		std::vector<std::string> hexlines;
+
+		switch (role.value()) {
+		case Wt::ItemDataRole::Edit:
+			assert(index.column() == 1); // enforced by flags()
+
+			value_str = Wt::asString(value).narrow();
+			// NYI: validate value_str
+
+			// convert string w/ hex codes to _printable_ string
+			hexlines.push_back(value_str);
+			str_from_hex = dumper_.hexlines_to_string(hexlines);
+			str_to_print = dumper_.toprint(str_from_hex)[0];
+
+			// update model
+			hex_[index.row()] = value_str;
+			print_[index.row()] = str_to_print;
+
+			// NYI: update associated plaintext/ciphertext view
+
+			// selectively signal views about changed AREA
+			// by emitting dataChanged():
+			// dataChanged().emit(index, index with column()+1);
+
+			// easier than dataChanged():
+			// signal interested views that the _whole_ model was updated
+			reset();
+
+			return true;
+
+		default:
+			return false;
+		}
+	}
+
+	Wt::WFlags<Wt::ItemFlag> flags(const Wt::WModelIndex &index) const override {
+		switch (index.column()) {
+		case 0:
+			return Wt::ItemFlag::Selectable; // addr non-editable
+		case 1:
+			return Wt::ItemFlag::Editable; // hex IS editable
+		case 2:
+			return Wt::ItemFlag::Selectable; // print non-editable
+		default:
+			return Wt::ItemFlag::Selectable; // NOTREACHED
 		}
 	}
 
