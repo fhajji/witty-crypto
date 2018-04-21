@@ -1,0 +1,115 @@
+// encdecmodel.h -- An MVC model class for PT/CT/Key/IV/...
+// Copyright (C) 2018 Farid Hajji <farid@hajji.name>
+
+#pragma once
+
+#include <string>
+#include <memory>
+#include <sstream>
+#include <iomanip>
+#include "crypto.h"
+
+class EncDecModel
+{
+public:
+	EncDecModel() :
+		cryptor_(std::make_unique<Crypto>()),
+		ciphers_(Crypto::CipherMap()) {
+
+	}
+
+	const Crypto::cipher_map_t ciphers() const { return ciphers_; }
+
+	bool setCipher(const std::string &cipher) {
+		cryptor_->setCipher(ciphers_[cipher]);
+		cipher_str_ = cipher;
+		// NYI: emit cipherChanged() signal
+		return true;
+	}
+	const std::string cipher() const { return cipher_str_; }
+
+	bool setKey(/* const Crypto::Bytes & newKey */) {
+		cryptor_->newKey();
+		key_ = cryptor_->key();
+		key_str_ = bytesToHex(key_);
+		// NYI: emit keyChanged() signal
+		return true;
+	}
+	const std::string key() const { return key_str_; }
+
+	bool setIV(/* const Crypto::Bytes & newIV */) {
+		cryptor_->newIV();
+		iv_ = cryptor_->iv();
+		iv_str_ = bytesToHex(iv_);
+		// NYI: emit ivChanged() signal
+		return true;
+	}
+	const std::string iv() const { return iv_str_; }
+
+	bool setPlaintext(const Crypto::Bytes &plaintext) {
+		plaintext_ = plaintext;
+		plaintext_str_ = Crypto::toString(plaintext_);
+		// NYI: emit plaintextChanged() signal
+		return true;
+	}
+	const std::string plaintext_str() const { return plaintext_str_; }
+	const Crypto::Bytes plaintext() const { return plaintext_; }
+
+	bool setCiphertext(const Crypto::Bytes &ciphertext) {
+		ciphertext_ = ciphertext;
+		ciphertext_str_ = bytesToHex(ciphertext_);
+		// NYI: emit ciphertextChanged() signal
+		return true;
+	}
+	const std::string ciphertext_str() const { return ciphertext_str_; }
+	const Crypto::Bytes ciphertext() const { return ciphertext_; }
+
+	void encrypt() {
+		try {
+			auto ciphertext = cryptor_->encrypt(plaintext_);
+			setCiphertext(ciphertext);
+		}
+		catch (std::runtime_error &e) {
+			auto ciphertext = Crypto::toBytes(e.what());
+			setCiphertext(ciphertext);
+		}
+	}
+
+	void decrypt() {
+		try {
+			auto plaintext = cryptor_->decrypt(ciphertext_);
+			setPlaintext(plaintext);
+		}
+		catch (std::runtime_error &e) {
+			auto plaintext = Crypto::toBytes(e.what());
+			setPlaintext(plaintext);
+		}
+	}
+
+private:
+	std::string bytesToHex(const Crypto::Bytes &input) {
+		std::ostringstream oss;
+		for (const auto &c : input)
+			oss << std::hex << std::setw(2) << std::setfill('0')
+				<< static_cast<unsigned int>(c);
+		return oss.str();
+	}
+
+private:
+	std::unique_ptr<Crypto> cryptor_;
+	Crypto::cipher_map_t ciphers_;
+
+	std::string cipher_str_; // name of current cipher
+
+	Crypto::Bytes key_;
+	std::string key_str_; // key as hex string
+
+	Crypto::Bytes iv_;
+	std::string iv_str_; // IV as hex string
+
+	Crypto::Bytes plaintext_;
+	std::string plaintext_str_;
+
+	Crypto::Bytes ciphertext_;
+	std::string ciphertext_str_;
+};

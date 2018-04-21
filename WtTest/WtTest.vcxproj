@@ -139,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crypto.h" />
+    <ClInclude Include="encdecmodel.h" />
     <ClInclude Include="hexdump.h" />
     <ClInclude Include="hexdumpmodel.h" />
     <ClInclude Include="scopeguard.h" />

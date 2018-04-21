@@ -27,6 +27,7 @@
 #include <iomanip>
 #include <memory>
 
+#include "encdecmodel.h"
 #include "hexdumpmodel.h"
 
 /*
@@ -38,17 +39,13 @@ public:
 	EncDecApplication(const Wt::WEnvironment& env);
 
 private:
-	Crypto::cipher_map_t    ciphers_;
-	std::unique_ptr<Crypto> crypto_;
+	std::unique_ptr<EncDecModel> ed_model_;
+
 	const std::shared_ptr<HexDumpTableModel> hexdump_model_pt_; // plaintext hexdump model
 	const std::shared_ptr<HexDumpTableModel> hexdump_model_ct_; // ciphertext hexdump model
 
 	// our application data
-	const EVP_CIPHER *theCipher_;
-	Crypto::Bytes theKey_;
-	Crypto::Bytes theIV_;
-	Crypto::Bytes thePlainText_;
-	Crypto::Bytes theCipherText_;
+	// const EVP_CIPHER *theCipher_;
 
 	// widgets displaying our application data
 	Wt::WComboBox *cbCiphers_;
@@ -75,12 +72,10 @@ private:
 */
 EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env),
+	ed_model_(std::make_unique<EncDecModel>()),
 	hexdump_model_pt_(std::make_shared<HexDumpTableModel>()),
 	hexdump_model_ct_(std::make_shared<HexDumpTableModel>())
 {
-	ciphers_ = Crypto::CipherMap();
-	crypto_ = std::make_unique<Crypto>();
-
 	useStyleSheet("WtTest.css");
 	setTitle("Crypt Demo");
 	root()->setHeight(480);
@@ -90,7 +85,7 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 
 	grid->addWidget(std::make_unique<Wt::WText>("Cipher"), 0, 0);
 	cbCiphers_ = grid->addWidget(std::make_unique<Wt::WComboBox>(), 0, 1);
-	for (const auto &p : ciphers_) {
+	for (const auto &p : ed_model_->ciphers()) {
 		cbCiphers_->addItem(p.first);
 	}
 	cbCiphers_->setCurrentIndex(0);
@@ -177,78 +172,54 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 void EncDecApplication::newkey()
 {
 	// generate a new random key
-	crypto_->newKey();
-	theKey_ = crypto_->key();
-
-	std::ostringstream oss;
-	for (std::size_t i = 0; i<theKey_.size(); ++i)
-		oss << std::hex << static_cast<unsigned int>(theKey_[i]);
-	keyText_->setText(oss.str());
+	ed_model_->setKey();
+	keyText_->setText(ed_model_->key());
 }
 
 void EncDecApplication::newiv()
 {
 	// generate a new random IV
-	crypto_->newIV();
-	theIV_ = crypto_->iv();
-
-	std::ostringstream oss;
-	for (std::size_t i = 0; i<theIV_.size(); ++i)
-		oss << std::hex << static_cast<unsigned int>(theIV_[i]);
-	ivText_->setText(oss.str());
+	ed_model_->setIV();
+	ivText_->setText(ed_model_->iv());
 }
 
 void EncDecApplication::newcipher()
 {
-	theCipher_ = ciphers_[cbCiphers_->currentText().narrow()];
-	crypto_->setCipher(theCipher_);
-	newkey();
-	newiv();
+	ed_model_->setCipher(cbCiphers_->currentText().narrow());
+	newkey(); // XXX remove later when signal/slot mechanism okay
+	newiv(); // XXX remove later when signal/slot mechanism okay
 }
 
 void EncDecApplication::updatePlainText()
 {
-	thePlainText_ = Crypto::toBytes(plainTextEdit_->text().narrow());
-	hexdump_model_pt_->rescan(thePlainText_);
+	ed_model_->setPlaintext(Crypto::toBytes(plainTextEdit_->text().narrow()));
+	hexdump_model_pt_->rescan(ed_model_->plaintext());
 }
 
 void EncDecApplication::updateCipherText()
 {
-	theCipherText_ = Crypto::toBytes(cipherTextEdit_->text().narrow());
-	hexdump_model_ct_->rescan(theCipherText_);
+	ed_model_->setCiphertext(Crypto::toBytes(cipherTextEdit_->text().narrow()));
+	hexdump_model_ct_->rescan(ed_model_->ciphertext());
 }
 
 void EncDecApplication::encrypt()
 {
-	// assume that our thePlainText_ is already synchronized
+	// assume ed_model_->plaintext is already synchronized
 	// with plainTextEdit_
 
-	try {
-		theCipherText_ = crypto_->encrypt(thePlainText_);
-	}
-	catch (std::runtime_error &e) {
-		// output error message instead
-		theCipherText_ = Crypto::toBytes(e.what());
-	}
-
-	hexdump_model_ct_->rescan(theCipherText_); // ciphertext has changed
-	cipherTextEdit_->setText(Wt::WString(Crypto::toString(theCipherText_)));
+	ed_model_->encrypt();
+	hexdump_model_ct_->rescan(ed_model_->ciphertext()); // ciphertext has changed
+	cipherTextEdit_->setText(Wt::WString(ed_model_->ciphertext_str()));
 }
 
 void EncDecApplication::decrypt()
 {
-	// assume theCipherText_ is already synchronized
+	// assume ed_model_->ciphertext is already synchronized
 	// with cipherTextEdit_
 
-	try {
-		thePlainText_ = crypto_->decrypt(theCipherText_);
-	}
-	catch (std::runtime_error &e) {
-		thePlainText_ = Crypto::toBytes(e.what());
-	}
-
-	hexdump_model_pt_->rescan(thePlainText_); // plaintext has changed
-	plainTextEdit_->setText(Wt::WString(Crypto::toString(thePlainText_)));
+	ed_model_->decrypt();
+	hexdump_model_pt_->rescan(ed_model_->plaintext()); // plaintext has changed
+	plainTextEdit_->setText(Wt::WString(ed_model_->plaintext_str()));
 }
 
 int main(int argc, char **argv)
