@@ -7,13 +7,12 @@
 #pragma warning ( disable: 4251 )
 #pragma warning ( disable: 4275 )
 
+#include <memory>
+
 #include <Wt/WApplication.h>
-#include <Wt/WBreak.h>
-#include <Wt/WContainerWidget.h>
 #include <Wt/WGridLayout.h>
 #include <Wt/WTabWidget.h>
 #include <Wt/WMenuItem.h>
-#include <Wt/WLineEdit.h>
 #include <Wt/WTextArea.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
@@ -21,12 +20,6 @@
 #include <Wt/WTableView.h>
 
 #include "crypto.h"
-#include <map>
-#include <ios>
-#include <sstream>
-#include <iomanip>
-#include <memory>
-
 #include "encdecmodel.h"
 #include "hexdumpmodel.h"
 
