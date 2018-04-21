@@ -33,7 +33,9 @@ public:
 	Lines tohex(const std::string &input);
 	Lines toprint(const std::string &input);
 
-	std::string hexlines_to_string(const Lines &hexlines);
+	std::string toprintline(const std::string &input);
+	std::string fromhex(const std::string &hexline);
+	std::string fromhexlines(const Lines &hexlines);
 
 	std::string dump(const std::string &input);
 
@@ -134,19 +136,32 @@ typename HexDump<Container>::Lines HexDump<Container>::toprint(const std::string
 	return result;
 }
 
-template<class Container>
-std::string HexDump<Container>::hexlines_to_string(const Lines &hexlines)
+template <class Container>
+std::string HexDump<Container>::toprintline(const std::string &input)
 {
 	std::ostringstream oss;
+	for (const auto &c : input)
+		oss << char_to_print(c);
+	return oss.str();
+}
 
-	for (const auto &line : hexlines) {
-		std::istringstream iss(line);
-		unsigned int c;
-		while (iss >> std::hex >> c) {
-			oss << static_cast<unsigned char>(c);
-		}
-	}
+template <class Container>
+std::string HexDump<Container>::fromhex(const std::string &hexline)
+{
+	std::ostringstream oss;
+	std::istringstream iss(hexline);
+	unsigned int c;
+	while (iss >> std::hex >> c)
+		oss << static_cast<unsigned char>(c);
+	return oss.str();
+}
 
+template<class Container>
+std::string HexDump<Container>::fromhexlines(const Lines &hexlines)
+{
+	std::ostringstream oss;
+	for (const auto &line : hexlines)
+		oss << fromhex(line);
 	return oss.str();
 }
 

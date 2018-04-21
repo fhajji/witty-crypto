@@ -53,20 +53,17 @@ public:
 	}
 
 	bool setData(const Wt::WModelIndex& index, const Wt::cpp17::any &value, Wt::ItemDataRole role = Wt::ItemDataRole::Edit) override {
-		std::string value_str, str_from_hex, str_to_print;
-		std::vector<std::string> hexlines;
+		std::string value_str, str_to_print;
 
 		switch (role.value()) {
 		case Wt::ItemDataRole::Edit:
 			assert(index.column() == 1); // enforced by flags()
 
 			value_str = Wt::asString(value).narrow();
-			// NYI: validate value_str
+			// NYI: validate and reformat value_str
 
 			// convert string w/ hex codes to _printable_ string
-			hexlines.push_back(value_str);
-			str_from_hex = dumper_.hexlines_to_string(hexlines);
-			str_to_print = dumper_.toprint(str_from_hex)[0];
+			str_to_print = dumper_.toprintline(dumper_.fromhex(value_str));
 
 			// update model
 			hex_[index.row()] = value_str;
