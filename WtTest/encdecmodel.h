@@ -37,9 +37,11 @@ public:
 	const Crypto::cipher_map_t ciphers() const { return ciphers_; }
 
 	void setCipher(const std::string &cipher) {
-		cryptor_->setCipher(ciphers_[cipher]);
-		cipher_str_ = cipher;
-		cipherChanged_.emit(cipher);
+		if (cipher != cipher_str_) {
+			cryptor_->setCipher(ciphers_[cipher]);
+			cipher_str_ = cipher;
+			cipherChanged_.emit(cipher);
+		}
 	}
 	const std::string cipher() const { return cipher_str_; }
 
@@ -74,17 +76,21 @@ public:
 	}
 
 	void setPlaintext(const Crypto::Bytes &plaintext) {
-		plaintext_ = plaintext;
-		plaintext_str_ = Crypto::toString(plaintext_);
-		plaintextChanged_.emit(plaintext_str_);
+		if (plaintext != plaintext_) {
+			plaintext_ = plaintext;
+			plaintext_str_ = Crypto::toString(plaintext_);
+			plaintextChanged_.emit(plaintext_str_);
+		}
 	}
 	const std::string plaintext_str() const { return plaintext_str_; }
 	const Crypto::Bytes plaintext() const { return plaintext_; }
 
 	void setCiphertext(const Crypto::Bytes &ciphertext) {
-		ciphertext_ = ciphertext;
-		ciphertext_str_ = bytesToHex(ciphertext_);
-		ciphertextChanged_.emit(ciphertext_str_);
+		if (ciphertext != ciphertext_) {
+			ciphertext_ = ciphertext;
+			ciphertext_str_ = bytesToHex(ciphertext_);
+			ciphertextChanged_.emit(ciphertext_str_);
+		}
 	}
 	const std::string ciphertext_str() const { return ciphertext_str_; }
 	const Crypto::Bytes ciphertext() const { return ciphertext_; }
