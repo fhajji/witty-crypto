@@ -7,6 +7,9 @@
 #include <memory>
 #include <sstream>
 #include <iomanip>
+
+#include <Wt/WSignal.h>
+
 #include "crypto.h"
 
 class EncDecModel
@@ -18,12 +21,18 @@ public:
 
 	}
 
+	Wt::Signal<std::string>& cipherChanged() { return cipherChanged_; }
+	Wt::Signal<std::string>& keyChanged() { return keyChanged_; }
+	Wt::Signal<std::string>& ivChanged() { return ivChanged_; }
+	Wt::Signal<std::string>& plaintextChanged() { return plaintextChanged_; }
+	Wt::Signal<std::string>& ciphertextChanged() { return ciphertextChanged_; }
+
 	const Crypto::cipher_map_t ciphers() const { return ciphers_; }
 
 	bool setCipher(const std::string &cipher) {
 		cryptor_->setCipher(ciphers_[cipher]);
 		cipher_str_ = cipher;
-		// NYI: emit cipherChanged() signal
+		cipherChanged_.emit(cipher);
 		return true;
 	}
 	const std::string cipher() const { return cipher_str_; }
@@ -32,7 +41,7 @@ public:
 		cryptor_->newKey();
 		key_ = cryptor_->key();
 		key_str_ = bytesToHex(key_);
-		// NYI: emit keyChanged() signal
+		keyChanged_.emit(key_str_);
 		return true;
 	}
 	const std::string key() const { return key_str_; }
@@ -41,7 +50,7 @@ public:
 		cryptor_->newIV();
 		iv_ = cryptor_->iv();
 		iv_str_ = bytesToHex(iv_);
-		// NYI: emit ivChanged() signal
+		ivChanged_.emit(iv_str_);
 		return true;
 	}
 	const std::string iv() const { return iv_str_; }
@@ -49,7 +58,7 @@ public:
 	bool setPlaintext(const Crypto::Bytes &plaintext) {
 		plaintext_ = plaintext;
 		plaintext_str_ = Crypto::toString(plaintext_);
-		// NYI: emit plaintextChanged() signal
+		plaintextChanged_.emit(plaintext_str_);
 		return true;
 	}
 	const std::string plaintext_str() const { return plaintext_str_; }
@@ -58,7 +67,7 @@ public:
 	bool setCiphertext(const Crypto::Bytes &ciphertext) {
 		ciphertext_ = ciphertext;
 		ciphertext_str_ = bytesToHex(ciphertext_);
-		// NYI: emit ciphertextChanged() signal
+		ciphertextChanged_.emit(ciphertext_str_);
 		return true;
 	}
 	const std::string ciphertext_str() const { return ciphertext_str_; }
@@ -112,4 +121,10 @@ private:
 
 	Crypto::Bytes ciphertext_;
 	std::string ciphertext_str_;
+
+	Wt::Signal<std::string> cipherChanged_;
+	Wt::Signal<std::string> keyChanged_;
+	Wt::Signal<std::string> ivChanged_;
+	Wt::Signal<std::string> plaintextChanged_;
+	Wt::Signal<std::string> ciphertextChanged_;
 };
