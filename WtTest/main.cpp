@@ -37,9 +37,6 @@ private:
 	const std::shared_ptr<HexDumpTableModel> hexdump_model_pt_; // plaintext hexdump model
 	const std::shared_ptr<HexDumpTableModel> hexdump_model_ct_; // ciphertext hexdump model
 
-	// our application data
-	// const EVP_CIPHER *theCipher_;
-
 	// widgets displaying our application data
 	Wt::WComboBox *cbCiphers_;
 	Wt::WText     *keyText_;
@@ -52,12 +49,6 @@ private:
 	std::map<Wt::WMenuItem *, Wt::WWidget *> mitems_;
 
 	void newcipher();
-	void newkey();
-	void newiv();
-	void updatePlainText();
-	void updateCipherText();
-	void encrypt();
-	void decrypt();
 };
 
 /*
@@ -142,16 +133,10 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 
 	cbCiphers_->changed().connect(this, &EncDecApplication::newcipher);
 
-	buttonKey->clicked().connect(this, &EncDecApplication::newkey);
-	buttonIV->clicked().connect(this, &EncDecApplication::newiv);
-	buttonEncrypt->clicked().connect(this, &EncDecApplication::encrypt);
-	buttonDecrypt->clicked().connect(this, &EncDecApplication::decrypt);
-
-	plainTextEdit_->changed().connect(this, &EncDecApplication::updatePlainText);
-	cipherTextEdit_->changed().connect(this, &EncDecApplication::updateCipherText);
-
-	plainTextEdit_->enterPressed().connect(this, &EncDecApplication::encrypt);
-	cipherTextEdit_->enterPressed().connect(this, &EncDecApplication::decrypt);
+	buttonKey->clicked().connect([=]() { ed_model_->setKey(); });
+	buttonIV->clicked().connect([=]() { ed_model_->setIV(); });
+	buttonEncrypt->clicked().connect([=]() { ed_model_->encrypt(); });
+	buttonDecrypt->clicked().connect([=]() { ed_model_->decrypt(); });
 
 	for (auto p = mitems_.begin(); p != mitems_.end(); ++p) {
 		p->first->triggered().connect([=](Wt::WMenuItem *mi){
@@ -159,60 +144,42 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 		});
 	}
 
+	// connect widgets to ed_model_
+	plainTextEdit_->changed().connect([=]() {
+		ed_model_->setPlaintext(Crypto::toBytes(plainTextEdit_->text().narrow()));
+		hexdump_model_pt_->rescan(ed_model_->plaintext());
+	});
+	cipherTextEdit_->changed().connect([=]() {
+		ed_model_->setCiphertext(Crypto::hexToBytes(cipherTextEdit_->text().narrow()));
+		hexdump_model_ct_->rescan(ed_model_->ciphertext());
+	});
+
+	// connect ed_model_ to widgets
+	ed_model_->plaintextChanged().connect([=](std::string s) {
+		plainTextEdit_->setText(s);
+	    hexdump_model_pt_->rescan(ed_model_->plaintext());
+	});
+	ed_model_->ciphertextChanged().connect([=](std::string s) {
+		cipherTextEdit_->setText(s);
+	    hexdump_model_ct_->rescan(ed_model_->ciphertext());
+	});
+	ed_model_->keyivChanged().connect([=](std::string key, std::string iv) {
+		keyText_->setText(key);
+		ivText_->setText(iv);
+	});
+	ed_model_->keyChanged().connect([=](std::string key) {
+		keyText_->setText(key);
+	});
+	ed_model_->ivChanged().connect([=](std::string iv) {
+		ivText_->setText(iv);
+	});
+
 	newcipher(); // initialize cipher (and key and iv)
-}
-
-void EncDecApplication::newkey()
-{
-	// generate a new random key
-	ed_model_->setKey();
-	keyText_->setText(ed_model_->key());
-}
-
-void EncDecApplication::newiv()
-{
-	// generate a new random IV
-	ed_model_->setIV();
-	ivText_->setText(ed_model_->iv());
 }
 
 void EncDecApplication::newcipher()
 {
 	ed_model_->setCipher(cbCiphers_->currentText().narrow());
-	newkey(); // XXX remove later when signal/slot mechanism okay
-	newiv(); // XXX remove later when signal/slot mechanism okay
-}
-
-void EncDecApplication::updatePlainText()
-{
-	ed_model_->setPlaintext(Crypto::toBytes(plainTextEdit_->text().narrow()));
-	hexdump_model_pt_->rescan(ed_model_->plaintext());
-}
-
-void EncDecApplication::updateCipherText()
-{
-	ed_model_->setCiphertext(Crypto::toBytes(cipherTextEdit_->text().narrow()));
-	hexdump_model_ct_->rescan(ed_model_->ciphertext());
-}
-
-void EncDecApplication::encrypt()
-{
-	// assume ed_model_->plaintext is already synchronized
-	// with plainTextEdit_
-
-	ed_model_->encrypt();
-	hexdump_model_ct_->rescan(ed_model_->ciphertext()); // ciphertext has changed
-	cipherTextEdit_->setText(Wt::WString(ed_model_->ciphertext_str()));
-}
-
-void EncDecApplication::decrypt()
-{
-	// assume ed_model_->ciphertext is already synchronized
-	// with cipherTextEdit_
-
-	ed_model_->decrypt();
-	hexdump_model_pt_->rescan(ed_model_->plaintext()); // plaintext has changed
-	plainTextEdit_->setText(Wt::WString(ed_model_->plaintext_str()));
 }
 
 int main(int argc, char **argv)

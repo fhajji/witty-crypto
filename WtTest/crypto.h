@@ -140,6 +140,22 @@ public:
 		return out;
 	}
 
+	static Bytes hexToBytes(const std::string &hexinput) {
+		Bytes out;
+		if (hexinput.size() % 2)
+			return out; // odd size, invalid hex
+		for (auto i = 0; i != hexinput.size(); i += 2) {
+			std::string hextwo;
+			hextwo.push_back(hexinput[i]);
+			hextwo.push_back(hexinput[i + 1]);
+			std::istringstream iss(hextwo);
+			unsigned int c;
+			iss >> std::hex >> c;
+			out.push_back(static_cast<unsigned char>(c));
+		}
+		return out;
+	}
+
 private:
 	std::string error_msg() {
 		std::ostringstream ess;
