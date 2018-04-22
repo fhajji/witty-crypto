@@ -10,12 +10,20 @@
 #include <string>
 #include <vector>
 #include "hexdump.h"
+#include "encdecmodel.h"
 
 class HexDumpTableModel : public Wt::WAbstractTableModel
 {
 public:
-	HexDumpTableModel() :
-		Wt::WAbstractTableModel() {
+	constexpr static int PT = 0;
+	constexpr static int CT = 1;
+
+	HexDumpTableModel(const std::shared_ptr<EncDecModel> &ed_model, const int ptct=PT) :
+		Wt::WAbstractTableModel(),
+		ed_model_(ed_model),
+		ptct_(ptct)
+	{
+		assert(ptct_ == 0 || ptct_ == 1);
 		dumper_ = HexDump<std::vector<std::string>>();
 	}
 
@@ -69,7 +77,20 @@ public:
 			hex_[index.row()] = value_str;
 			print_[index.row()] = str_to_print;
 
-			// NYI: update associated plaintext/ciphertext view
+			// update associated plaintext/ciphertext view
+			// by updating the underlying EncDecModel, which
+			// will signal those views to update themselves.
+			switch (ptct_) {
+			case PT:
+				ed_model_->setPlaintext(Crypto::toBytes(dumper_.fromhexlines(hex_)));
+				break;
+			case CT:
+				ed_model_->setCiphertext(Crypto::toBytes(dumper_.fromhexlines(hex_)));
+				break;
+			default:
+				// NOTREACHED
+				break;
+			}
 
 			// selectively signal views about changed AREA
 			// by emitting dataChanged():
@@ -114,4 +135,6 @@ private:
 	std::vector<std::string> addr_;
 	std::vector<std::string> hex_;
 	std::vector<std::string> print_;
+	std::shared_ptr<EncDecModel> ed_model_;
+	int ptct_;
 };

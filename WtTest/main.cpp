@@ -32,7 +32,7 @@ public:
 	EncDecApplication(const Wt::WEnvironment& env);
 
 private:
-	std::unique_ptr<EncDecModel> ed_model_;
+	std::shared_ptr<EncDecModel> ed_model_;
 
 	const std::shared_ptr<HexDumpTableModel> hexdump_model_pt_; // plaintext hexdump model
 	const std::shared_ptr<HexDumpTableModel> hexdump_model_ct_; // ciphertext hexdump model
@@ -56,9 +56,9 @@ private:
 */
 EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env),
-	ed_model_(std::make_unique<EncDecModel>()),
-	hexdump_model_pt_(std::make_shared<HexDumpTableModel>()),
-	hexdump_model_ct_(std::make_shared<HexDumpTableModel>())
+	ed_model_(std::make_shared<EncDecModel>()),
+	hexdump_model_pt_(std::make_shared<HexDumpTableModel>(ed_model_, HexDumpTableModel::PT)),
+	hexdump_model_ct_(std::make_shared<HexDumpTableModel>(ed_model_, HexDumpTableModel::CT))
 {
 	useStyleSheet("WtTest.css");
 	setTitle("Crypt Demo");
