@@ -95,16 +95,16 @@ void EncDecApplication::create_gui()
 
 	plainTextHDView_->setEditTriggers(Wt::EditTrigger::SingleClicked);
 	cipherTextHDView_->setEditTriggers(Wt::EditTrigger::SingleClicked);
+}
 
+void EncDecApplication::connect_signals()
+{
 	for (auto p = mitems_.begin(); p != mitems_.end(); ++p) {
 		p->first->triggered().connect([=](Wt::WMenuItem *mi) {
 			mitems_[mi]->show();
 		});
 	}
-}
 
-void EncDecApplication::connect_signals()
-{
 	cbCiphers_->changed().connect(this, &EncDecApplication::newcipher);
 
 	buttonKey_->clicked().connect([=]() { ed_model_->setKey(); });
