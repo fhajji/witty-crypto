@@ -55,6 +55,12 @@ public:
 				return Wt::WString("Index(x,y) = {1},{2} out of bounds").arg(index.row()).arg(index.column());
 			}
 		
+		case Wt::ItemDataRole::Edit:
+			if (index.column() == 1)
+				return Wt::WString(hex_[index.row()]); // prefill for edit
+			else
+				return Wt::cpp17::any();
+
 		default:
 			return Wt::cpp17::any();
 		}
