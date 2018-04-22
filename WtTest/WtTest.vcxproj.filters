@@ -35,6 +35,9 @@
     <ClInclude Include="encdecmodel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="validateitemdelegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="WtTest.css" />

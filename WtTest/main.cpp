@@ -22,6 +22,7 @@
 #include "crypto.h"
 #include "encdecmodel.h"
 #include "hexdumpmodel.h"
+#include "validateitemdelegate.h"
 
 /*
 * A simple encryptor / decryptor.
@@ -48,6 +49,8 @@ private:
 
 	std::map<Wt::WMenuItem *, Wt::WWidget *> mitems_;
 
+	std::shared_ptr<ValidateItemDelegate> hd_delegate_;
+
 	void newcipher();
 };
 
@@ -58,7 +61,8 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env),
 	ed_model_(std::make_shared<EncDecModel>()),
 	hexdump_model_pt_(std::make_shared<HexDumpTableModel>(ed_model_, HexDumpTableModel::PT)),
-	hexdump_model_ct_(std::make_shared<HexDumpTableModel>(ed_model_, HexDumpTableModel::CT))
+	hexdump_model_ct_(std::make_shared<HexDumpTableModel>(ed_model_, HexDumpTableModel::CT)),
+	hd_delegate_(std::make_shared<ValidateItemDelegate>())
 {
 	useStyleSheet("WtTest.css");
 	setTitle("Crypt Demo");
@@ -127,6 +131,9 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	cipherTextHDView_->setColumnWidth(0, 80);   // addr
 	cipherTextHDView_->setColumnWidth(1, 350);  // hex
 	cipherTextHDView_->setColumnWidth(2, 150);  // print
+
+	plainTextHDView_->setItemDelegate(hd_delegate_);
+	cipherTextHDView_->setItemDelegate(hd_delegate_);
 
 	plainTextHDView_->setEditTriggers(Wt::EditTrigger::SingleClicked);
 	cipherTextHDView_->setEditTriggers(Wt::EditTrigger::SingleClicked);

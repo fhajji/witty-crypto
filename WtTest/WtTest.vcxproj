@@ -141,6 +141,7 @@
     <ClInclude Include="crypto.h" />
     <ClInclude Include="encdecmodel.h" />
     <ClInclude Include="hexdump.h" />
+    <ClInclude Include="validateitemdelegate.h" />
     <ClInclude Include="hexdumpmodel.h" />
     <ClInclude Include="scopeguard.h" />
   </ItemGroup>
