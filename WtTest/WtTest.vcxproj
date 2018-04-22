@@ -135,10 +135,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="encdecapplication.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crypto.h" />
+    <ClInclude Include="encdecapplication.h" />
     <ClInclude Include="encdecmodel.h" />
     <ClInclude Include="hexdump.h" />
     <ClInclude Include="validateitemdelegate.h" />

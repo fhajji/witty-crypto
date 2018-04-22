@@ -14,13 +14,16 @@
 
 class ValidateItemDelegate : public Wt::WItemDelegate {
 public:
-	ValidateItemDelegate(std::shared_ptr<Wt::WRegExpValidator> validator) :
+	ValidateItemDelegate(std::shared_ptr<Wt::WValidator> validator) :
 		Wt::WItemDelegate(),
 		validator_(validator) {}
 
 	std::unique_ptr<Wt::WWidget> createEditor(const Wt::WModelIndex& index,
 			Wt::WFlags<Wt::ViewItemRenderFlag> flags) const
 	{
+		// Code copied from WItemDelegate (4.0.3), except for parts marked XXX
+		// Also replaced IndexContainerWidget by WContainerWidget
+
 		std::unique_ptr<Wt::WContainerWidget> result(new Wt::WContainerWidget());
 		result->setSelectable(true);
 
@@ -38,7 +41,7 @@ public:
 		lineEdit->resize(Wt::WLength(100, Wt::LengthUnit::Percentage),
 			Wt::WLength(100, Wt::LengthUnit::Percentage)); //for Konqueror
 
-		// attach validator to the lineEdit
+		// XXX: attach validator to the lineEdit
 		lineEdit->setValidator(validator_);
 
 		result->addWidget(std::move(lineEdit));
@@ -48,6 +51,10 @@ public:
 
 	void doCloseEditor(Wt::WWidget *editor, bool save) const
 	{
+		// Code copied from WItemDelegate (4.0.3), except for parts marked XXX
+		// Also replaced IndexContainerWidget by WContainerWidget
+
+		// XXX: check validator before saving changes
 		if (save) {
 			Wt::WContainerWidget *w =
 				dynamic_cast<Wt::WContainerWidget *>(editor);
@@ -55,12 +62,17 @@ public:
 
 			save = lineEdit->validate() == Wt::ValidationState::Valid;
 		}
+
+		// Original code
 		closeEditor().emit(editor, save);
 	}
 
 	Wt::cpp17::any editState(Wt::WWidget *editor, const Wt::WModelIndex& index)
 		const
 	{
+		// Code copied from WItemDelegate (4.0.3), except for parts marked XXX
+		// Also replaced IndexContainerWidget by WContainerWidget
+
 		Wt::WContainerWidget *w =
 			dynamic_cast<Wt::WContainerWidget *>(editor);
 		Wt::WLineEdit *lineEdit = dynamic_cast<Wt::WLineEdit *>(w->widget(0));
@@ -71,6 +83,9 @@ public:
 	void setEditState(Wt::WWidget *editor, const Wt::WModelIndex& index,
 		const Wt::cpp17::any& value) const
 	{
+		// Code copied from WItemDelegate (4.0.3), except for parts marked XXX
+		// Also replaced IndexContainerWidget by WContainerWidget
+
 		Wt::WContainerWidget *w =
 			dynamic_cast<Wt::WContainerWidget *>(editor);
 		Wt::WLineEdit *lineEdit = dynamic_cast<Wt::WLineEdit *>(w->widget(0));
@@ -79,5 +94,5 @@ public:
 	}
 
 private:
-	std::shared_ptr<Wt::WRegExpValidator> validator_;
+	std::shared_ptr<Wt::WValidator> validator_;
 };

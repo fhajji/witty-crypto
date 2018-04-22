@@ -1,4 +1,5 @@
-// crypto.h
+// crypto.h -- Crypto class with calls to OpenSSL's libcrypto.
+// Copyright (C) 2018 Farid Hajji <farid@hajji.name>
 
 #pragma once
 
