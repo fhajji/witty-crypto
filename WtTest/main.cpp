@@ -18,6 +18,7 @@
 #include <Wt/WText.h>
 #include <Wt/WComboBox.h>
 #include <Wt/WTableView.h>
+#include <Wt/WRegExpValidator.h>
 
 #include "crypto.h"
 #include "encdecmodel.h"
@@ -50,6 +51,7 @@ private:
 	std::map<Wt::WMenuItem *, Wt::WWidget *> mitems_;
 
 	std::shared_ptr<ValidateItemDelegate> hd_delegate_;
+	std::shared_ptr<Wt::WRegExpValidator> hd_validator_;
 
 	void newcipher();
 };
@@ -61,9 +63,11 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 	: WApplication(env),
 	ed_model_(std::make_shared<EncDecModel>()),
 	hexdump_model_pt_(std::make_shared<HexDumpTableModel>(ed_model_, HexDumpTableModel::PT)),
-	hexdump_model_ct_(std::make_shared<HexDumpTableModel>(ed_model_, HexDumpTableModel::CT)),
-	hd_delegate_(std::make_shared<ValidateItemDelegate>())
+	hexdump_model_ct_(std::make_shared<HexDumpTableModel>(ed_model_, HexDumpTableModel::CT))
 {
+	hd_validator_ = std::make_shared<Wt::WRegExpValidator>("\\s*([0-9A-Fa-f]{2}\\s+)*([0-9A-Fa-f]{2}\\s*)");
+	hd_delegate_ = std::make_shared<ValidateItemDelegate>(hd_validator_);
+
 	useStyleSheet("WtTest.css");
 	setTitle("Crypt Demo");
 	root()->setHeight(480);

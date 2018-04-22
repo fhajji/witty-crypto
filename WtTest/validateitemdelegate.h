@@ -10,10 +10,13 @@
 #include <Wt/WFlags.h>
 #include <Wt/WHBoxLayout.h>
 #include <Wt/WAny.h>
+#include <Wt/WValidator.h>
 
 class ValidateItemDelegate : public Wt::WItemDelegate {
 public:
-	ValidateItemDelegate() : Wt::WItemDelegate() {}
+	ValidateItemDelegate(std::shared_ptr<Wt::WRegExpValidator> validator) :
+		Wt::WItemDelegate(),
+		validator_(validator) {}
 
 	std::unique_ptr<Wt::WWidget> createEditor(const Wt::WModelIndex& index,
 			Wt::WFlags<Wt::ViewItemRenderFlag> flags) const
@@ -34,6 +37,10 @@ public:
 
 		lineEdit->resize(Wt::WLength(100, Wt::LengthUnit::Percentage),
 			Wt::WLength(100, Wt::LengthUnit::Percentage)); //for Konqueror
+
+		// attach validator to the lineEdit
+		lineEdit->setValidator(validator_);
+
 		result->addWidget(std::move(lineEdit));
 
 		return std::move(result);
@@ -41,6 +48,13 @@ public:
 
 	void doCloseEditor(Wt::WWidget *editor, bool save) const
 	{
+		if (save) {
+			Wt::WContainerWidget *w =
+				dynamic_cast<Wt::WContainerWidget *>(editor);
+			Wt::WLineEdit *lineEdit = dynamic_cast<Wt::WLineEdit *>(w->widget(0));
+
+			save = lineEdit->validate() == Wt::ValidationState::Valid;
+		}
 		closeEditor().emit(editor, save);
 	}
 
@@ -63,4 +77,7 @@ public:
 
 		lineEdit->setText(Wt::cpp17::any_cast<WT_USTRING>(value));
 	}
+
+private:
+	std::shared_ptr<Wt::WRegExpValidator> validator_;
 };
