@@ -1,7 +1,7 @@
 // encdecmodel.h -- An MVC model class for PT/CT/Key/IV/...
 // Copyright (C) 2018 Farid Hajji <farid@hajji.name>
 
-// ISC License(ISC)
+// ISC License
 // 
 // Copyright 2018 Farid Hajji <farid@hajji.name>
 // 

@@ -1,7 +1,7 @@
 // hexdumpmodel.h -- A WAbstractTabelModel class for HexDump
 // Copyright (C) 2018 Farid Hajji <farid@hajji.name>
 
-// ISC License(ISC)
+// ISC License
 // 
 // Copyright 2018 Farid Hajji <farid@hajji.name>
 // 

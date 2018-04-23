@@ -1,7 +1,7 @@
 // main.cpp -- Simple Encrypt / Decrypt Demo.
 // Copyright (C) 2018 Farid Hajji <farid@hajji.name>
 
-// ISC License(ISC)
+// ISC License
 // 
 // Copyright 2018 Farid Hajji <farid@hajji.name>
 // 
