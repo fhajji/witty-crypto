@@ -18,7 +18,7 @@ public:
 	constexpr static int PT = 0;
 	constexpr static int CT = 1;
 
-	HexDumpTableModel(const std::shared_ptr<EncDecModel> &ed_model, const int ptct=PT) :
+	HexDumpTableModel(const std::shared_ptr<EncDecModel> &ed_model, const int ptct = PT) :
 		Wt::WAbstractTableModel(),
 		ed_model_(ed_model),
 		ptct_(ptct)
@@ -54,7 +54,7 @@ public:
 			default:
 				return Wt::WString("Index(x,y) = {1},{2} out of bounds").arg(index.row()).arg(index.column());
 			}
-		
+
 		case Wt::ItemDataRole::Edit:
 			if (index.column() == 1)
 				return Wt::WString(hex_[index.row()]); // prefill for edit
@@ -129,8 +129,8 @@ public:
 	void rescan(const Crypto::Bytes &input) {
 		auto instr = Crypto::toString(input);
 
-		addr_  = dumper_.toaddr(instr);
-		hex_   = dumper_.tohex(instr);
+		addr_ = dumper_.toaddr(instr);
+		hex_ = dumper_.tohex(instr);
 		print_ = dumper_.toprint(instr);
 
 		reset(); // send modelReset() signal to all attached views.

@@ -1,4 +1,5 @@
 // scopeguard.h -- A RAII scope guard to clean up resources
+// Copyright (C) 2018 Farid Hajji <farid@hajji.name>
 
 #pragma once
 

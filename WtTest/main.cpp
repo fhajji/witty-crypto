@@ -1,7 +1,5 @@
-/*
-* Simple Encrypt / Decrypt Demo.
-* Copyright (C) 2018 Farid Hajji <farid@hajji.name>
-*/
+// main.cpp -- Simple Encrypt / Decrypt Demo.
+// Copyright (C) 2018 Farid Hajji <farid@hajji.name>
 
 #include "encdecapplication.h"
 
