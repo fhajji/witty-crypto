@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{586799F9-C611-4292-B31E-168BF0423E6E}</ProjectGuid>
-    <RootNamespace>WtTest</RootNamespace>
+    <RootNamespace>WtCrypto</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
     <ProjectName>WtCrypto</ProjectName>
   </PropertyGroup>
