@@ -40,8 +40,8 @@ EncDecApplication::EncDecApplication(const Wt::WEnvironment& env)
 
 void EncDecApplication::create_gui()
 {
-	useStyleSheet("WtTest.css");
-	setTitle("Crypt Demo");
+	useStyleSheet("WtCrypto.css");
+	setTitle("Witty Crypto Demo");
 	root()->setHeight(480);
 	root()->setWidth(800);
 

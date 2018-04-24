@@ -49,6 +49,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="WtTest.css" />
+    <None Include="WtCrypto.css" />
   </ItemGroup>
 </Project>

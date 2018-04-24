@@ -23,6 +23,7 @@
     <ProjectGuid>{586799F9-C611-4292-B31E-168BF0423E6E}</ProjectGuid>
     <RootNamespace>WtTest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectName>WtCrypto</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -149,7 +150,7 @@
     <ClInclude Include="scopeguard.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="WtTest.css" />
+    <None Include="WtCrypto.css" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
