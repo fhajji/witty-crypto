@@ -163,7 +163,7 @@ public:
 		Bytes out;
 		if (hexinput.size() % 2)
 			return out; // odd size, invalid hex
-		for (auto i = 0; i != hexinput.size(); i += 2) {
+		for (std::size_t i = 0; i != hexinput.size(); i += 2) {
 			std::string hextwo;
 			hextwo.push_back(hexinput[i]);
 			hextwo.push_back(hexinput[i + 1]);

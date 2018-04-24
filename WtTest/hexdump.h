@@ -105,7 +105,7 @@ typename HexDump<Container>::Lines HexDump<Container>::tohex(const std::string &
 	Lines result;
 	std::ostringstream oss;
 
-	for (auto i = 0; i != input.size(); ++i) {
+	for (std::size_t i = 0; i != input.size(); ++i) {
 		if ((i > 0) && (i % (2 * chars_per_col_) == 0)) {
 			// start a new line
 			result.push_back(oss.str());
@@ -141,7 +141,7 @@ typename HexDump<Container>::Lines HexDump<Container>::toprint(const std::string
 	Lines result;
 	std::ostringstream oss;
 
-	for (auto i = 0; i != input.size(); ++i) {
+	for (std::size_t i = 0; i != input.size(); ++i) {
 		if ((i > 0) && (i % (2 * chars_per_col_) == 0)) {
 			result.push_back(oss.str());
 			oss.str("");

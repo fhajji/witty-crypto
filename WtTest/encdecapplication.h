@@ -21,9 +21,11 @@
 
 #pragma once
 
+#ifdef WIN32
 // squelch msvs-2017 annoying dll-interface warnings
 #pragma warning ( disable: 4251 )
 #pragma warning ( disable: 4275 )
+#endif
 
 #include <memory>
 

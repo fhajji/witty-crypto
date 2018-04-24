@@ -85,7 +85,7 @@ public:
 		closeEditor().emit(editor, save);
 	}
 
-	Wt::cpp17::any editState(Wt::WWidget *editor, const Wt::WModelIndex& index)
+	Wt::cpp17::any editState(Wt::WWidget *editor, const Wt::WModelIndex& /* index */)
 		const
 	{
 		// Code copied from WItemDelegate (4.0.3), except for parts marked XXX
@@ -98,7 +98,7 @@ public:
 		return Wt::cpp17::any(lineEdit->text());
 	}
 
-	void setEditState(Wt::WWidget *editor, const Wt::WModelIndex& index,
+	void setEditState(Wt::WWidget *editor, const Wt::WModelIndex& /* index */,
 		const Wt::cpp17::any& value) const
 	{
 		// Code copied from WItemDelegate (4.0.3), except for parts marked XXX
