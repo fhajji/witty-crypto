@@ -57,11 +57,11 @@ void EncDecApplication::create_gui()
 
 	grid->addWidget(std::make_unique<Wt::WText>("Key"), 1, 0);
 	keyText_ = grid->addWidget(std::make_unique<Wt::WText>(), 1, 1);
-	buttonKey_ = grid->addWidget(std::make_unique<Wt::WPushButton>("Generate Key"), 1, 2);
+	buttonKey_ = grid->addWidget(std::make_unique<Wt::WPushButton>("New Key"), 1, 2);
 
 	grid->addWidget(std::make_unique<Wt::WText>("IV"), 2, 0);
 	ivText_ = grid->addWidget(std::make_unique<Wt::WText>(), 2, 1);
-	buttonIV_ = grid->addWidget(std::make_unique<Wt::WPushButton>("Generate IV"), 2, 2);
+	buttonIV_ = grid->addWidget(std::make_unique<Wt::WPushButton>("New IV"), 2, 2);
 
 	grid->addWidget(std::make_unique<Wt::WText>("Plaintext"), 3, 0);
 	auto tw_plain = grid->addWidget(std::make_unique<Wt::WTabWidget>(), 3, 1);
