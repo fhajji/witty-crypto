@@ -21,6 +21,9 @@
     <ClCompile Include="encdecapplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="hexdumpmodel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crypto.h">
