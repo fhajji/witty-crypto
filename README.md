@@ -119,7 +119,7 @@ our custom "WtCrypto.css" and to Witty's "resources" directory.
 On Unix, try this, assuming you're still in the "build" directory:
 
 ```
-ln -s /usr/local/Wt/resources .
+ln -s /usr/local/share/Wt/resources .
 cp ../WtCrypto.css .
 ./wtcrypto.wt --docroot="." --http-address="0.0.0.0" --http-port="8080"
 ```
