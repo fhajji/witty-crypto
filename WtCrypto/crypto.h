@@ -81,10 +81,10 @@ public:
 			{ "EVP_des_ede3_cbc",     EVP_des_ede3_cbc() },
 			{ "EVP_des_ede3_cfb",     EVP_des_ede3_cfb() },
 			{ "EVP_des_ede3_ofb",     EVP_des_ede3_ofb() },
-			{ "EVP_idea_cbc",         EVP_idea_cbc() },
-			{ "EVP_idea_cfb",         EVP_idea_cfb() },
-			{ "EVP_idea_ecb",         EVP_idea_ecb() },
-			{ "EVP_idea_ofb",         EVP_idea_ofb() },
+			// { "EVP_idea_cbc",         EVP_idea_cbc() },
+			// { "EVP_idea_cfb",         EVP_idea_cfb() },
+			// { "EVP_idea_ecb",         EVP_idea_ecb() },
+			// { "EVP_idea_ofb",         EVP_idea_ofb() },
 		};
 		return ciphers;
 	}
