@@ -57,7 +57,8 @@ students of basic cryptography.
 First of all, get and install all the prerequisites above.
 If your package manager has installed older versions of witty, boost,
 cmake etc in /usr prefix, get the newest ones and install them into
-prefix /usr/local.
+prefix /usr/local. Make sure that /usr/local/bin precedes /usr/bin
+in PATH.
 
 Assuming that you have compiled Witty and installed it in /usr/local:
 
@@ -82,7 +83,7 @@ or
 env CXX=g++ CC=gcc cmake ..
 ```
 
-### Building on Window
+### Building on Windows
 
 1. First of all, you'll need to install Visual Studio 2017.
 2. Then, install [vcpkg](https://docs.microsoft.com/en-us/cpp/vcpkg):
@@ -112,7 +113,7 @@ paths before compiling / debugging.
 
 ## Running the executable
 
-The executable (wtcrypto.wt on Unix) needs access to both
+The executable ("wtcrypto.wt" on Unix) needs access to both
 our custom "WtCrypto.css" and to Witty's "resources" directory.
 
 On Unix, try this, assuming you're still in the "build" directory:
