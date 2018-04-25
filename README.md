@@ -63,7 +63,7 @@ in PATH.
 Assuming that you have compiled Witty and installed it in /usr/local:
 
 ```
-cd WtCrypto/WtCrypto    # where CMakeLists.txt is located
+cd witty-crypto/WtCrypto    # where CMakeLists.txt is located
 mkdir build
 cd build
 cmake ..
