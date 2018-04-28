@@ -88,3 +88,7 @@ endfunction()
 enable_cxx_compiler_flag_if_supported("-Wall")
 enable_cxx_compiler_flag_if_supported("-Wextra")
 enable_cxx_compiler_flag_if_supported("-pedantic")
+
+# if using vcpkg's integration, try this (not tested, recommanded by wt port):
+# find_package(Wt REQUIRED)
+# target_link_libraries(wtcrypto.wt PRIVATE Wt::Dbo Wt::DboMSSQLServer Wt::DboPostgres Wt::DboSqlite3)

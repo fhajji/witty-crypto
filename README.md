@@ -4,7 +4,8 @@ Welcome to Witty Crypto.
 
 This is a tool to learn cryptography over the web.
 It is written in modern C++, using [OpenSSL](https://www.openssl.org/) for the
-cryptographic bits, and [Witty](https://www.webtoolkit.eu/wt/) for the web-based GUI.
+cryptographic bits, and [Witty](https://www.webtoolkit.eu/wt/) (Wt) for the
+web-based GUI.
 
 ## Current status
 
@@ -33,22 +34,15 @@ students of basic cryptography.
 
 * Libraries:
   * [Witty](https://github.com/emweb/wt/releases) 4.0.3+
-    * Source [.tar.gz](https://github.com/emweb/wt/archive/4.0.3.tar.gz) [zip](https://github.com/emweb/wt/archive/4.0.3.zip)
-    * Windows binaries for Visual Studio 2017: [x86](https://github.com/emweb/wt/releases/download/4.0.3/Wt-4.0.3-msvs2017-Windows-x86-SDK.zip), [x64](https://github.com/emweb/wt/releases/download/4.0.3/Wt-4.0.3-msvs2017-Windows-x64-SDK.zip)
   * [Boost](https://www.boost.org/) 1.66.0+
-    * Source [.tar.gz](https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz)
-  * [OpenSSL](https://www.openssl.org/) 1.0.2+
-    * Source [.tar.gz](https://www.openssl.org/source/openssl-1.0.2o.tar.gz)
+  * [OpenSSL](https://www.openssl.org/) 1.0.2o+
 
 * Build System:
-  * (Unix) [CMake](https://cmake.org/) 3.5.1+
-    * Source [.tar.gz](https://cmake.org/files/v3.11/cmake-3.11.1.tar.gz)
-	* Binary for Linux [.tar.gz](https://cmake.org/files/v3.11/cmake-3.11.1-Linux-x86_64.tar.gz)
-	* Binary for Windows: [x86](https://cmake.org/files/v3.11/cmake-3.11.1-win32-x86.msi), [x64](https://cmake.org/files/v3.11/cmake-3.11.1-win64-x64.msi). Note that Visual Studio includes a reasonably recent CMake as well. You don't need CMake on Windows if using the provided VS solution and project files.
+  * [CMake](https://cmake.org/) 3.5.1+
   * A C++14 capable/compatible compiler:
     * (Unix) [Clang](https://clang.llvm.org/) 3.8.0+
 	* (Unix) [GCC](https://gcc.gnu.org/) 5.4.0+
-	* (Windows) [Microsoft Visual Studio 2017](https://www.visualstudio.com/vs/) 15.6.6+
+	* (Windows) [Microsoft Visual Studio 2017](https://www.visualstudio.com/vs/) 15.6.6+ and [vcpkg](https://github.com/Microsoft/vcpkg).
 
 ## Building
 
@@ -56,9 +50,9 @@ students of basic cryptography.
 
 First of all, get and install all the prerequisites above.
 If your package manager has installed older versions of witty, boost,
-cmake etc in /usr prefix, get the newest ones and install them into
-prefix /usr/local. Make sure that /usr/local/bin precedes /usr/bin
-in PATH.
+cmake etc in /usr prefix, get the newest ones as source, compile and
+install them into prefix /usr/local. Make sure that /usr/local/bin precedes
+/usr/bin in PATH.
 
 Assuming that you have compiled Witty and installed it in /usr/local:
 
@@ -85,31 +79,37 @@ env CXX=g++ CC=gcc cmake ..
 
 ### Building on Windows
 
-1. First of all, you'll need to install Visual Studio 2017.
+1. First of all, install [Visual Studio 2017](https://www.visualstudio.com/vs/).
 2. Then, install [vcpkg](https://docs.microsoft.com/en-us/cpp/vcpkg):
-     * In "Developer Command Prompt for VS 2017", [fetched via git](https://github.com/Microsoft/vcpkg), and compiled with bootstrap-vcpkg.bat
-	 * `vcpkg --vcpkg-root PATH-TO-VCPKG-FOLDER`
-3. Add boost and openssl dependencies:
-     * `vcpkg search boost`
-     * `vcpkg install boost:x64-windows`
-	 * `vcpkg install boost:x86-windows`
-     * `vcpkg integrate install`
-	 * repeat for openssl
+     * Open "Developer Command Prompt for VS 2017"
+	 * `cd ROOTDIR_OF_VCPKG` # e.g. \Users\YOU, will install \Users\YOU\vcpkg
+	 * `git clone https://github.com/Microsoft/vcpkg.git`
+	 * `cd vcpkg`
+	 * `.\bootstrap-vcpkg.bat`
+	 * `vcpkg integrate install`
+	 * `vcpkg integrate powershell`
+3. Fetch and compile wt and dependencies :
+     * `vcpkg install boost:x86-windows`
+	 * `vcpkg install boost:x64-windows`
+	 * `vcpkg install wt:x86-windows`
+	 * `vcpkg install wt:x64-windows`
 
-Thanks to the magic of vcpkg, installed dependencies will be automatically
+vcpkg will fetch, compile, and install boost, wt, and
+all of their dependencies (including openssl) in both
+32-bit (x86-windows) and 64-bit (x64-windows) debug and
+release architectures.
+	 
+Thanks to the magic of vcpkg, installed packages will be automatically
 found by Visual Studio: there is no need to add include or library folders
 to your VS projects for them.
 
-Should Witty-4.0.3+ have been added to vcpkg's "ports directory",
-you could add it in the same way as boost and openssl. Meanwhile, you'll
-need to do it manually:
+4. You can then use the supplied solution "WtCrypto.sln". Or, try your
+luck with CMake (untested, need to edit WtCrypto\CMakeLists.txt
+accordingly, and [follow the instructions](https://github.com/Microsoft/vcpkg)
+w.r.t the build chain).
 
-Assuming that you've compiled Witty yourself, or (easier), that
-you've unpacked the pre-compiled windows binaries somewhere,
-just open the solution "WtCrypto.sln" in Visual Studio 2017.
-
-You may wish to [follow the instructions](https://redmine.webtoolkit.eu/projects/wt/wiki/Installing_Wt_on_MS_Windows) on setting various
-paths before compiling / debugging.
+5. If you prefer the manual approach, you may wish to [follow the instructions](https://redmine.webtoolkit.eu/projects/wt/wiki/Installing_Wt_on_MS_Windows)
+on using the pre-compiled libraries, on setting various paths before compiling / debugging etc.
 
 ## Running the executable
 
@@ -124,11 +124,18 @@ cp ../WtCrypto.css .
 ./wtcrypto.wt --docroot="." --http-address="0.0.0.0" --http-port="8080"
 ```
 
-Use `[0::0]` instead of `0.0.0.0` to listen to all IPv6 interfaces.
+Use `0::0` instead of `0.0.0.0` to listen to all IPv6 interfaces.
 Then, point a browser to the machine running wtcrypto.wt at port 8080.
 
 Running on Windows is similar, with the additional twist that you
-need to add the folder containing Witty's DLLs to PATH [as per the instructions](https://redmine.webtoolkit.eu/projects/wt/wiki/Installing_Wt_on_MS_Windows#Running-the-Examples).
+need to add the folder containing Witty's DLLs to PATH [as per the instructions](https://redmine.webtoolkit.eu/projects/wt/wiki/Installing_Wt_on_MS_Windows#Running-the-Examples). If you've used vcpkg to build and install wt, a copy of the
+"resources" directory is:
+
+```
+ROOTDIR_OF_VCPKG\vcpkg\packages\wt_x64-windows\share\Wt\resources
+```
+
+Good luck.
 
 ## Copyright
 
